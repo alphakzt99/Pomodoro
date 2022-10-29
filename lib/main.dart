@@ -36,8 +36,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
-        ? '${(controller.duration!.inHours % 24).toString().padLeft(2, '0')}:${(controller.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
-        : '${(count.inHours % 24).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
+        ? '${(controller.duration!.inHours % 60).toString().padLeft(2, '0')}:${(controller.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
+        : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
   double progress = 1.0;
@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 60));
+        AnimationController(vsync: this, duration: Duration(seconds: 0));
     controller.addListener(() {
       if (controller.isAnimating) {
         setState(() {
@@ -120,14 +120,56 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       onTap: () {
                         if (controller.isDismissed) {
                           showModalBottomSheet(
+                              backgroundColor:
+                                  Theme.of(context).primaryColorDark,
+                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      topRight: Radius.circular(20))),
                               context: context,
-                              builder: (context) => CupertinoTimerPicker(
-                                    initialTimerDuration: controller.duration!,
-                                    onTimerDurationChanged: (value) {
-                                      setState(() {
-                                        controller.duration = value;
-                                      });
-                                    },
+                              builder: (context) => Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Text(
+                                        "Choose your timer",
+                                        style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      CupertinoTimerPicker(
+                                        initialTimerDuration:
+                                            controller.duration!,
+                                        onTimerDurationChanged: (value) {
+                                          setState(() {
+                                            controller.duration = value;
+                                          });
+                                        },
+                                      ),
+                                      MaterialButton(
+                                        height: 50,
+                                        minWidth: 300,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30)),
+                                        color: Theme.of(context).primaryColor,
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text(
+                                          "Confirm",
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .primaryColorDark,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      )
+                                    ],
                                   ));
                         }
                       },
@@ -147,7 +189,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
               MaterialButton(
                   elevation: 5,
-                  minWidth: 100,
+                  height: 50,
+                  minWidth: 300,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)),
                   color: Theme.of(context).primaryColorLight,
@@ -167,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   },
                   child: isCounting == false
                       ? Text(
-                          "Start the timer",
+                          "Start",
                           style: TextStyle(
                               color: Theme.of(context).primaryColor,
                               fontSize: 20,
@@ -180,12 +223,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               fontSize: 20,
                               fontWeight: FontWeight.bold),
                         )),
+              SizedBox(
+                height: 20,
+              ),
               MaterialButton(
                 elevation: 5,
-                minWidth: 100,
+                height: 50,
+                minWidth: 300,
                 shape: RoundedRectangleBorder(
                     side:
-                        BorderSide(color: Theme.of(context).primaryColorLight),
+                        BorderSide(
+                          width: 2,
+                          color: Theme.of(context).primaryColorLight),
                     borderRadius: BorderRadius.circular(20)),
                 color: Theme.of(context).primaryColor,
                 onPressed: () {
@@ -194,16 +243,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     setState(() {
                       isCounting = false;
                     });
+                  } else {
+                    controller.reset();
+                    setState(() {
+                      isCounting = false;
+                    });
                   }
                 },
                 child: Text(
-                  "Reset the timer",
+                  "Reset",
                   style: TextStyle(
                       color: Theme.of(context).primaryColorLight,
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
+              SizedBox(
+                height: 20,
+              )
             ]),
           )),
     );
