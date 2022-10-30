@@ -37,57 +37,6 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Container(
-      color: Colors.white,
-      height: size.height,
-      width: size.width,
-      child: CircularCountDownTimer(
-        width: 300,
-        height: 300,
-        fillColor: Colors.black,
-        ringColor: Colors.blue,
-        onComplete: () {
-          Alert(
-                  context: this.context,
-                  type: AlertType.success,
-                  content: Text("Hello"))
-              .show();
-          AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) => AlertDialog(
-                    contentPadding: const EdgeInsets.all(10),
-                    backgroundColor: Theme.of(context).primaryColorDark,
-                    title: const Text(
-                      "Alert",
-                    ),
-                    titleTextStyle: TextStyle(
-                        color: Theme.of(context).primaryColorLight,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                    content: const Text(
-                        "Pomodoro Time is up. Take a rest and continue"),
-                    contentTextStyle: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
-                      fontSize: 20,
-                    ),
-                    actionsAlignment: MainAxisAlignment.spaceBetween,
-                    actionsPadding: const EdgeInsets.all(10),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            _controller.reverse();
-                          },
-                          child: Text(
-                            "Dismiss",
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColorLight),
-                          ))
-                    ],
-                  ).build(context)
-                  );
-        },
-        duration: 20,
-      ),
-    );
+    return Scaffold();
   }
 }
