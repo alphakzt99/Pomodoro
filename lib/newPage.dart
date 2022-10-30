@@ -1,6 +1,5 @@
-import 'package:circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -10,33 +9,60 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> opacityAnimation;
-  Tween<double> opacityTween = Tween<double>(begin: 0.0, end: 1.0);
-  Tween<double> marginTopTween = Tween<double>(begin: 300, end: 280);
-  late Animation<double> marginTopAnimation;
-  @override
-  void initState() {
-    _controller = AnimationController(
-        duration: const Duration(milliseconds: 300), vsync: this);
-    marginTopAnimation = marginTopTween.animate(_controller)
-      ..addListener(() {
-        setState(() {});
-      });
-    _controller.forward();
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Scaffold();
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColorLight,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColorLight,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(
+            FluentIcons.arrow_circle_left_24_regular,
+            size: 32,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+      ),
+      body: ListTileTheme(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        style: ListTileStyle.drawer,
+        tileColor: Theme.of(context).primaryColorDark,
+        iconColor: Theme.of(context).primaryColor,
+        textColor: Theme.of(context).primaryColor,
+        contentPadding: const EdgeInsets.only(top: 20, bottom: 20, right: 20),
+        child: Container(
+          width: size.width,
+          height: size.height,
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Pomodoro List",
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold),
+                ),
+                ListView.builder(
+                    itemBuilder: ((context, index) => ListTile(
+                          leading: Icon(
+                            FluentIcons.clock_24_regular,
+                            color: Theme.of(context).primaryColorLight,
+                          ),
+                          title: Text("Title"),
+                          subtitle: Text("DateTime"),
+                        )))
+              ]),
+        ),
+      ),
+    );
   }
 }

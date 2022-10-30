@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  late final AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
   String get countText {
     Duration count = controller.duration! * controller.value;
@@ -51,28 +54,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   notify() {
     if (controller.isDismissed) {
       Alert(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               buttons: [
-            DialogButton(
-                radius: BorderRadius.circular(20),
-                color: Theme.of(context).primaryColor,
-                child: Text(
-                  "Dismiss",
-                  style: TextStyle(fontSize:16,color: Theme.of(context).primaryColorLight,fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                }),
-            DialogButton(
-              radius: BorderRadius.circular(20),
-                color: Theme.of(context).primaryColor,
-                child: Text(
-                  "Snooze",
-                  style: TextStyle(fontSize:16,color: Theme.of(context).primaryColorLight,fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                })
-          ],
+                DialogButton(
+                    radius: BorderRadius.circular(20),
+                    color: Theme.of(context).primaryColor,
+                    child: Text(
+                      "Dismiss",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).primaryColorLight,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    }),
+                DialogButton(
+                    radius: BorderRadius.circular(20),
+                    color: Theme.of(context).primaryColor,
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).primaryColorLight,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    })
+              ],
               context: context,
               style: AlertStyle(
                   descStyle: TextStyle(
@@ -96,6 +106,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double progress = 1.0;
   @override
   void initState() {
+
+    _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: Duration(seconds: 60));
     controller.addListener(() {
@@ -118,9 +130,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _advancedDrawerController.dispose();
     controller.dispose();
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void _handleMenuDrawer() {
+    _advancedDrawerController.showDrawer();
   }
 
   @override
@@ -129,11 +146,95 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: AdvancedDrawer(
-        drawer: Container(),
+        childDecoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        controller: _advancedDrawerController,
+        backdropColor: Theme.of(context).primaryColorDark,
+        drawer: Container(
+          margin: EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
+          child: ListTileTheme(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            style: ListTileStyle.drawer,
+            tileColor: Theme.of(context).primaryColorDark,
+            iconColor: Theme.of(context).primaryColor,
+            textColor: Theme.of(context).primaryColor,
+            contentPadding:
+                const EdgeInsets.only(top: 20, bottom: 20, right: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Theme.of(context).primaryColorLight),
+                      image: const DecorationImage(
+                          image: AssetImage("lib/photos/KZT.jpg")),
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+                RichText(
+                    text: TextSpan(children: [
+                  TextSpan(
+                      text: "Kaung Zaw Thant\n\n",
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                  TextSpan(
+                      text: "Level 1",
+                      style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold))
+                ])),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(FluentIcons.person_accounts_24_regular),
+                  title: Text("My Account"),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(FluentIcons.history_24_regular),
+                  title: Text("Pomodoro List"),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(FluentIcons.settings_24_regular),
+                  title: Text("Settings"),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(FluentIcons.contact_card_24_regular),
+                  title: Text("Contact Us"),
+                ),
+              ],
+            ),
+          ),
+        ),
         child: Scaffold(
-            
             appBar: AppBar(
               elevation: 0,
+              leading: IconButton(
+                  onPressed: _handleMenuDrawer,
+                  icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                    valueListenable: _advancedDrawerController,
+                    builder: ((context, value, child) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Icon(
+                          value.visible
+                              ? Icons.clear
+                              : FluentIcons.person_accounts_24_regular,
+                          color: Color(0xFF7AE582),
+                          key: ValueKey<bool>(value.visible),
+                        ),
+                      );
+                    }),
+                  )),
               backgroundColor: Theme.of(context).primaryColor,
               actions: [
                 IconButton(
@@ -141,9 +242,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (ctx) => newPage()));
                     },
-                    icon: Icon(FluentIcons.list_24_regular,size: 24,color: Theme.of(context).primaryColorLight,))
+                    icon: Icon(
+                      FluentIcons.list_24_regular,
+                      size: 24,
+                      color: Theme.of(context).primaryColorLight,
+                    ))
               ],
-              
             ),
             body: Container(
               width: size.width,
@@ -183,8 +287,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         Text(
                                           "Choose your timer",
                                           style: TextStyle(
-                                              color:
-                                                  Theme.of(context).primaryColor,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold),
                                         ),
@@ -250,7 +354,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         });
                       } else {
                         controller.reverse(
-                            from: controller.value == 0 ? 1.0 : controller.value);
+                            from:
+                                controller.value == 0 ? 1.0 : controller.value);
                         setState(() {
                           isCounting = true;
                         });
