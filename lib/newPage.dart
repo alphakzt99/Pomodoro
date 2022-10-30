@@ -13,9 +13,9 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColorLight,
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -24,20 +24,20 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
           icon: Icon(
             FluentIcons.arrow_circle_left_24_regular,
             size: 32,
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).primaryColorLight,
           ),
         ),
       ),
       body: ListTileTheme(
+        style: ListTileStyle.list,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        style: ListTileStyle.drawer,
         tileColor: Theme.of(context).primaryColorDark,
         iconColor: Theme.of(context).primaryColor,
         textColor: Theme.of(context).primaryColor,
-        contentPadding: const EdgeInsets.only(top: 20, bottom: 20, right: 20),
+        contentPadding: const EdgeInsets.only(left:20,top: 10, bottom: 8,),
         child: Container(
           width: size.width,
-          height: size.height,
+          height: size.height * 0.9,
           margin: const EdgeInsets.all(20),
           padding: const EdgeInsets.all(10),
           child: Column(
@@ -47,19 +47,44 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                 Text(
                   "Pomodoro List",
                   style: TextStyle(
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).primaryColorLight,
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
-                ListView.builder(
-                    itemBuilder: ((context, index) => ListTile(
-                          leading: Icon(
-                            FluentIcons.clock_24_regular,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                          title: Text("Title"),
-                          subtitle: Text("DateTime"),
-                        )))
+                SizedBox(height: 10,),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    leading: Icon(
+                      FluentIcons.clock_24_filled,
+                     
+                    ),
+                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
+                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    leading: Icon(
+                      FluentIcons.clock_24_filled,
+                   
+                    ),
+                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
+                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    leading: Icon(
+                      FluentIcons.clock_24_filled,
+                  
+                    ),
+                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
+                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
+                  ),
+                ),
               ]),
         ),
       ),
