@@ -1,5 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/android_sounds.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:pomodoro/newPage.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,21 +22,22 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.black,
           primaryColorLight: Color(0xFF7AE582),
           primaryColorDark: Colors.white),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({
+    super.key,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  late AnimationController controller;
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
@@ -40,13 +45,57 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
+  bool isCounting = false;
+  notify() {
+    if (controller.isDismissed) {
+      Alert(
+              buttons: [
+            DialogButton(
+                color: Theme.of(context).primaryColor,
+                child: Text(
+                  "Dismiss",
+                  style: TextStyle(fontSize:16,color: Theme.of(context).primaryColorLight,fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }),
+            DialogButton(
+                color: Theme.of(context).primaryColor,
+                child: Text(
+                  "Snooze",
+                  style: TextStyle(fontSize:16,color: Theme.of(context).primaryColorLight,fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                })
+          ],
+              context: context,
+              style: AlertStyle(
+                  descStyle: TextStyle(
+                    color: Theme.of(context).primaryColorLight,
+                    fontSize: 16,
+                  ),
+                  titleStyle: TextStyle(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  alertAlignment: Alignment.topCenter,
+                  alertBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20))),
+              title: "Alert",
+              desc: "Pomodoro timer is up.Rest and continue later.")
+          .show();
+    }
+  }
+
   double progress = 1.0;
-  late AnimationController controller;
   @override
   void initState() {
     controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 0));
+        AnimationController(vsync: this, duration: Duration(seconds: 60));
     controller.addListener(() {
+      notify();
       if (controller.isAnimating) {
         setState(() {
           progress = controller.value;
@@ -54,9 +103,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       } else {
         setState(() {
           progress = 1.0;
+          isCounting = false;
         });
       }
     });
+
     // TODO: implement initState
     super.initState();
   }
@@ -72,13 +123,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
 
-    bool isCounting = false;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Theme.of(context).primaryColor,
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (ctx) => newPage()));
+                  },
+                  icon: Icon(Icons.arrow_left))
+            ],
             leading: IconButton(
               onPressed: () {
                 Drawer(
@@ -123,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               backgroundColor:
                                   Theme.of(context).primaryColorDark,
                               elevation: 10,
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(20),
                                       topRight: Radius.circular(20))),
@@ -217,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               fontWeight: FontWeight.bold),
                         )
                       : Text(
-                          "Stop the timer",
+                          "Stop",
                           style: TextStyle(
                               color: Theme.of(context).primaryColor,
                               fontSize: 20,
@@ -231,10 +289,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 height: 50,
                 minWidth: 300,
                 shape: RoundedRectangleBorder(
-                    side:
-                        BorderSide(
-                          width: 2,
-                          color: Theme.of(context).primaryColorLight),
+                    side: BorderSide(
+                        width: 2, color: Theme.of(context).primaryColorLight),
                     borderRadius: BorderRadius.circular(20)),
                 color: Theme.of(context).primaryColor,
                 onPressed: () {
