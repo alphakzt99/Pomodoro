@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_ringtone_player/android_sounds.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
+import 'package:pomodoro/timer.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,8 +44,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  Timer timer1 = Timer();
   late final AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
+  late DatabaseHandler handler;
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
@@ -80,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           fontWeight: FontWeight.bold),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      setState(() {});
                     })
               ],
               context: context,
@@ -103,10 +108,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
   }
 
+  var key = GlobalKey<FormState>();
+  TextEditingController tcontroller = TextEditingController();
+  TextEditingController tcontroller1 = TextEditingController();
   double progress = 1.0;
   @override
   void initState() {
-
     _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: Duration(seconds: 60));
@@ -123,7 +130,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         });
       }
     });
-
+    if (timer1 != null) {
+      tcontroller1.text = timer1.id.toString();
+      tcontroller.text = timer1.title;
+    }
     // TODO: implement initState
     super.initState();
   }
@@ -140,6 +150,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _advancedDrawerController.showDrawer();
   }
 
+  bool changed1 = false;
+  bool changed = false;
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -280,48 +292,213 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         topLeft: Radius.circular(20),
                                         topRight: Radius.circular(20))),
                                 context: context,
-                                builder: (context) => Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text(
-                                          "Choose your timer",
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        CupertinoTimerPicker(
-                                          initialTimerDuration:
-                                              controller.duration!,
-                                          onTimerDurationChanged: (value) {
-                                            setState(() {
-                                              controller.duration = value;
-                                            });
-                                          },
-                                        ),
-                                        MaterialButton(
-                                          height: 50,
-                                          minWidth: 300,
-                                          elevation: 0,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(30)),
-                                          color: Theme.of(context).primaryColor,
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text(
-                                            "Confirm",
+                                builder: (context) => Container(
+                                      width: size.width,
+                                      height: size.height * 0.7,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Form(
+                                            key: key,
+                                            child: Container(
+                                              width: size.width,
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 20, vertical: 10),
+                                              padding: EdgeInsets.all(10),
+                                              child: Column(
+                                                children: [
+                                                  TextFormField(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        changed1 = true;
+                                                      });
+                                                    },
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .primaryColor,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    decoration: changed1 == true
+                                                        ? InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            labelText: "ID",
+                                                            labelStyle: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColor,
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                            hintText:
+                                                                "ID Number",
+                                                            hintStyle: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          )
+                                                        : InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            hintText:
+                                                                "ID Number",
+                                                            hintStyle: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                    controller: tcontroller1,
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    validator: (value) {
+                                                      if (value!.isEmpty) {
+                                                        return 'Enter the title';
+                                                      }
+                                                      return null;
+                                                    },
+                                                    onFieldSubmitted:
+                                                        ((value) =>
+                                                            tcontroller1.text),
+                                                  ),
+                                                  TextFormField(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        changed = true;
+                                                      });
+                                                    },
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .primaryColor,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    decoration: changed == true
+                                                        ? InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            labelText: "Title",
+                                                            labelStyle: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColor,
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                            hintText: "Title",
+                                                            hintStyle: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          )
+                                                        : InputDecoration(
+                                                            contentPadding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            hintText: "Title",
+                                                            hintStyle: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                    controller: tcontroller,
+                                                    keyboardType:
+                                                        TextInputType.text,
+                                                    validator: (value) {
+                                                      if (value!.isEmpty) {
+                                                        return 'Enter the title';
+                                                      }
+                                                      return null;
+                                                    },
+                                                    onFieldSubmitted:
+                                                        ((value) =>
+                                                            tcontroller.text),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "Choose your timer",
                                             style: TextStyle(
                                                 color: Theme.of(context)
-                                                    .primaryColorDark,
-                                                fontSize: 24,
+                                                    .primaryColor,
+                                                fontSize: 20,
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                        )
-                                      ],
+                                          CupertinoTimerPicker(
+                                            initialTimerDuration:
+                                                controller.duration!,
+                                            onTimerDurationChanged: (value) {
+                                              setState(() {
+                                                controller.duration = value;
+                                              });
+                                            },
+                                          ),
+                                          MaterialButton(
+                                            height: 50,
+                                            minWidth: 300,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(30)),
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              if (key.currentState!
+                                                  .validate()) {
+                                                return;
+                                              }
+                                              if (Timer != null) {
+                                                await handler
+                                                    .updateData(Timer.withID(
+                                                  timer1.id,
+                                                  tcontroller.text,
+                                                  countText,
+                                                ));
+
+                                                return;
+                                              }
+                                              Timer timer = Timer.withID(
+                                                  int.parse(tcontroller1.text),
+                                                  tcontroller.text,
+                                                  countText);
+                                              int success = await handler
+                                                  .insertData(timer);
+                                              if (success == 0) {
+                                                print('not successful');
+                                              }
+                                            },
+                                            child: Text(
+                                              "Confirm",
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .primaryColorDark,
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ));
                           }
                         },

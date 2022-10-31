@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class Timer {
-  late int id;
-  late String title;
-  late DateTime time;
-  late TimeOfDayFormat timeOfDayFormat;
+  int id = 1;
+  String title = '';
+  String time= '';
+  
   int get getId => id;
 
   set setId(int id) => this.id = id;
@@ -13,15 +13,11 @@ class Timer {
 
   set setTitle(String title) => this.title = title;
 
-  DateTime get getDateTime => time;
+  String get getDateTime => time;
 
-  set setDateTime(DateTime time) => this.time = time;
+  set setDateTime(String time) => this.time = time;
 
-  TimeOfDayFormat get getTofD => timeOfDayFormat;
-
-  set setTofD(TimeOfDayFormat timeOfDayFormat) =>
-      this.timeOfDayFormat = timeOfDayFormat;
-
+  
   Timer();
   Timer.withID(
     this.id,

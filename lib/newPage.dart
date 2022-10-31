@@ -1,5 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro/database_handler.dart';
+import 'package:sqflite/sqflite.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -9,6 +11,7 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
+  DatabaseHandler handler = DatabaseHandler(DatabaseHandler.handler);
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -34,7 +37,11 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
         tileColor: Theme.of(context).primaryColorDark,
         iconColor: Theme.of(context).primaryColor,
         textColor: Theme.of(context).primaryColor,
-        contentPadding: const EdgeInsets.only(left:20,top: 10, bottom: 8,),
+        contentPadding: const EdgeInsets.only(
+          left: 20,
+          top: 10,
+          bottom: 8,
+        ),
         child: Container(
           width: size.width,
           height: size.height * 0.9,
@@ -51,40 +58,50 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 10,),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: Icon(
-                      FluentIcons.clock_24_filled,
-                     
-                    ),
-                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
-                  ),
+                SizedBox(
+                  height: 10,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: Icon(
-                      FluentIcons.clock_24_filled,
-                   
-                    ),
-                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: Icon(
-                      FluentIcons.clock_24_filled,
-                  
-                    ),
-                    title: Text("Title",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-                    subtitle: Text("DateTime",style: TextStyle(fontSize: 16),),
-                  ),
-                ),
+                FutureBuilder(
+                    future: handler.selectAllbooks(),
+                    builder: ((context, snapshot) {
+                      return snapshot.connectionState != ConnectionState.done
+                          ? Center(
+                              child: Column(children: [
+                                CircularProgressIndicator(
+                                  backgroundColor: Theme.of(context).primaryColor,
+                                  color: Theme.of(context).primaryColorDark,
+                                  
+                                ),
+                                Text(
+                                  "Loading",
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ]),
+                            )
+                          : ListView.builder(itemBuilder: ((context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 10),
+                                child: ListTile(
+                                  leading: Icon(
+                                    FluentIcons.clock_24_filled,
+                                  ),
+                                  title: Text(
+                                    snapshot.data![index].title,
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    snapshot.data![index].time,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              );
+                            }));
+                    }))
               ]),
         ),
       ),
