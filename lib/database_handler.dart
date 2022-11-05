@@ -9,9 +9,9 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseHandler {
   String DBNAME = 'Pomodoro.db';
   String TABLE_NAME = 'Pomodoro';
-  String COLUMN_ID = 'ID';
-  String COLUMN_TITLE = 'Title';
-  String COLUMN_TIMER = 'Time';
+  String COLUMN_ID = 'id';
+  String COLUMN_TITLE = 'title';
+  String COLUMN_TIMER = 'time';
   static late Database _database = DatabaseHandler._database;
 
   Future<Database> get database async {
@@ -31,17 +31,15 @@ class DatabaseHandler {
 
   Future createDatabase(Database db, int version) async{
     String sql =
-        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
+        'create table $TABLE_NAME($COLUMN_ID integer primary key,$COLUMN_TITLE text not null,$COLUMN_TIMER text not null)';
     await db.execute(sql);
   }
 
-  Future<int> insertData(String title, String time) async {
+  Future<int> insertData(int id,String title, String time) async {
     var db = await database;
     return await db.rawInsert(
-        'INSERT INTO $TABLE_NAME'
-        '($COLUMN_TITLE, $COLUMN_TIMER)'
-        'VALUES(?, ?)',
-        [title, time]);
+        'INSERT INTO $TABLE_NAME($COLUMN_ID,$COLUMN_TITLE, $COLUMN_TIMER) VALUES(?, ?, ?)',
+        [id, title, time]);
     ;
   }
 

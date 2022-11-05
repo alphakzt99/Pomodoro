@@ -88,29 +88,63 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                               ]),
                             )
                           : Container(
-                            width: size.width*0.8,
+                              width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: ListView.builder(
-                                  itemBuilder: ((context, index) {
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 10),
-                                  child: ListTile(
-                                    leading: Icon(
-                                      FluentIcons.clock_24_filled,
-                                    ),
-                                    title: Text(
-                                      snapshot.data![index].title,
-                                      style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                      snapshot.data![index].time,
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                );
-                              })),
+                              child: snapshot.data!.isEmpty
+                                  ? Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 200,
+                                          height: 200,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(30),
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      "lib/photos/error.jpg"))),
+                                        ),
+                                        SizedBox(height: 20,),
+                                        Text(
+                                          "You have no data",
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .primaryColorLight,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    )
+                                  : ListView.builder(
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: ((context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: ListTile(
+                                            leading: Icon(
+                                              
+                                              FluentIcons.clock_24_filled,
+                                              color: Theme.of(context).primaryColorLight,
+                                            ),
+                                            title: Text(
+                                              snapshot.data![index].title,
+                                              style: TextStyle(
+                                                  color: Theme.of(context).primaryColorLight,
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            subtitle: Text(
+                                              
+                                              snapshot.data![index].time,
+                                              style: TextStyle(
+                                                color: Theme.of(context).primaryColorLight,
+                                                fontSize: 16),
+                                            ),
+                                          ),
+                                        );
+                                      })),
                             );
                     }))
               ]),

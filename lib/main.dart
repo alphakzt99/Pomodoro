@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           fontWeight: FontWeight.bold),
                     ),
                     onPressed: () {
-                      databaseHandler.insertData(timer1.title, timer1.time);
+                      databaseHandler.insertData(timer1.id,timer1.title, timer1.time);
                       Navigator.of(context).pop();
                     })
               ],
@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     databaseHandler = DatabaseHandler();
     databaseHandler.initDatabase().whenComplete(() async {
-      await databaseHandler.insertData(timer1.title, timer1.time);
+      await databaseHandler.insertData(timer1.id,timer1.title, timer1.time);
       setState(() {});
     });
 
@@ -300,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 context: context,
                                 builder: (context) => Container(
                                       width: size.width,
-                                      height: size.height * 0.7,
+                                      height: size.height * 0.8,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
@@ -475,13 +475,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                 return;
                                               }
                                               await databaseHandler.insertData(
+                                                  int.parse(tcontroller1.text),
                                                   tcontroller.text, countText);
 
-                                              Timer timer = Timer.withoutID(
+                                              Timer timer = Timer.withID(
+                                                int.parse(tcontroller1.text),
                                                   tcontroller.text, countText);
                                               int success =
                                                   await databaseHandler
                                                       .insertData(
+                                                        int.parse(tcontroller1.text),
                                                           tcontroller.text,
                                                           countText);
                                               if (success == 0) {
