@@ -29,9 +29,9 @@ class Timer {
     this.time,
   );
 
-  Map<String, dynamic> toMap() => {'id': id, 'title': title, 'timer': time};
+  Map<String, dynamic> toMap() => {'title': title, 'timer': time};
   Timer.fromMap(Map<String, dynamic> map) {
-    id = map['id'];
+  
     title = map['title'];
     time = map['timer'];
   }

@@ -11,7 +11,13 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  DatabaseHandler handler = DatabaseHandler(DatabaseHandler.handler);
+  late DatabaseHandler handler;
+  @override
+  void initState() {
+    super.initState();
+    handler = DatabaseHandler();
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -68,9 +74,9 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                           ? Center(
                               child: Column(children: [
                                 CircularProgressIndicator(
-                                  backgroundColor: Theme.of(context).primaryColor,
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   color: Theme.of(context).primaryColorDark,
-                                  
                                 ),
                                 Text(
                                   "Loading",
@@ -81,26 +87,31 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                 )
                               ]),
                             )
-                          : ListView.builder(itemBuilder: ((context, index) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 10),
-                                child: ListTile(
-                                  leading: Icon(
-                                    FluentIcons.clock_24_filled,
+                          : Container(
+                            width: size.width*0.8,
+                              height: size.height * 0.7,
+                              child: ListView.builder(
+                                  itemBuilder: ((context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: ListTile(
+                                    leading: Icon(
+                                      FluentIcons.clock_24_filled,
+                                    ),
+                                    title: Text(
+                                      snapshot.data![index].title,
+                                      style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                      snapshot.data![index].time,
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                   ),
-                                  title: Text(
-                                    snapshot.data![index].title,
-                                    style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text(
-                                    snapshot.data![index].time,
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                              );
-                            }));
+                                );
+                              })),
+                            );
                     }))
               ]),
         ),

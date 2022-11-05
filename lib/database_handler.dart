@@ -1,50 +1,48 @@
 import 'dart:core';
+import 'dart:io' show Directory;
 import 'timer.dart';
-import 'package:path/path.dart';
+import 'dart:async';
+import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
 
+
 class DatabaseHandler {
-  String DBNAME = 'Pomodoro Timer';
+  String DBNAME = 'Pomodoro.db';
   String TABLE_NAME = 'Pomodoro';
   String COLUMN_ID = 'ID';
   String COLUMN_TITLE = 'Title';
   String COLUMN_TIMER = 'Time';
-  static Database _database = DatabaseHandler._database;
-  static DatabaseHandler handler = DatabaseHandler(handler);
-  
-  DatabaseHandler._createInstance();
-  factory DatabaseHandler(handler) {
-    if (handler! == null) {
-      handler = DatabaseHandler._createInstance();
-    }
-    return handler;
-  }
+  static late Database _database = DatabaseHandler._database;
 
   Future<Database> get database async {
-    if (_database == null) {
-      _database = await initDatabase();
+    if (_database != null) {
+      return _database;
     }
+    _database = await initDatabase();
     return _database;
   }
 
-  Future<String> get databasePath async{
-    return await getDatabasesPath();
+  Future<Database> initDatabase() async {
+   
+    var dir = await getDatabasesPath();
+    String path = join(dir, DBNAME);
+    return openDatabase(path, version: 1, onCreate: createDatabase);
   }
 
-  Future<Database> initDatabase() async{
-    String dir = await getDatabasesPath();
-    String path = join(dir,'DBNAME');
-    return openDatabase(path,version: 1,onCreate: createDatabase);
-  }
-
-  void createDatabase(Database db,int index){
+  Future createDatabase(Database db, int version) async{
     String sql =
-        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT,$COLUMN_TIMER TEXT);';
-    db.execute(sql);
+        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
+    await db.execute(sql);
   }
-  Future<int> insertData(Timer timer) async {
+
+  Future<int> insertData(String title, String time) async {
     var db = await database;
-    return await db.insert(TABLE_NAME, timer.toMap());
+    return await db.rawInsert(
+        'INSERT INTO $TABLE_NAME'
+        '($COLUMN_TITLE, $COLUMN_TIMER)'
+        'VALUES(?, ?)',
+        [title, time]);
+    ;
   }
 
   Future<int> deleteData(int id) async {
@@ -59,7 +57,7 @@ class DatabaseHandler {
   }
 
   Future<List<Timer>> selectAllbooks() async {
-    var db = await database;
+    var db = await initDatabase();
     var result = await db.query(TABLE_NAME);
 
     List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
