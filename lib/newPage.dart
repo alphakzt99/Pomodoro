@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
-import 'package:sqflite/sqflite.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -11,11 +10,18 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  late DatabaseHandler handler;
+  DatabaseHandler handler = DatabaseHandler();
+  ScrollController controller = ScrollController();
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
+    handler.selectAllbooks();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -64,68 +70,78 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 FutureBuilder(
                     future: handler.selectAllbooks(),
                     builder: ((context, snapshot) {
-                      return snapshot.connectionState != ConnectionState.done
-                          ? Center(
-                              child: Column(children: [
-                                CircularProgressIndicator(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  color: Theme.of(context).primaryColorDark,
-                                ),
-                                Text(
-                                  "Loading",
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ]),
+                      return snapshot.data == null
+                          ? Container(
+                              width: size.width * 0.8,
+                              height: size.height * 0.7,
+                              child: Center(
+                                  child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 200,
+                                    height: 200,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        image: const DecorationImage(
+                                            image: AssetImage(
+                                                "lib/photos/error.jpg"))),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  Text(
+                                    "You have no data",
+                                    style: TextStyle(
+                                        color:
+                                            Theme.of(context).primaryColorLight,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              )),
                             )
                           : Container(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: snapshot.data!.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 200,
-                                          height: 200,
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                              image: DecorationImage(
-                                                  image: AssetImage(
-                                                      "lib/photos/error.jpg"))),
-                                        ),
-                                        SizedBox(
-                                          height: 20,
+                              child: snapshot.connectionState ==
+                                      ConnectionState.waiting
+                                  ? Center(
+                                      child: Column(children: [
+                                        CircularProgressIndicator(
+                                          backgroundColor:
+                                              Theme.of(context).primaryColor,
+                                          color: Theme.of(context)
+                                              .primaryColorDark,
                                         ),
                                         Text(
-                                          "You have no data",
+                                          "Loading",
                                           style: TextStyle(
                                               color: Theme.of(context)
-                                                  .primaryColorLight,
-                                              fontSize: 24,
+                                                  .primaryColor,
+                                              fontSize: 20,
                                               fontWeight: FontWeight.bold),
                                         )
-                                      ],
+                                      ]),
                                     )
                                   : ListView.builder(
+                                      shrinkWrap: true,
+                                      controller: controller,
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: ((context, index) {
                                         return Padding(
-                                          padding:const  EdgeInsets.only(bottom: 10),
+                                          padding:
+                                              const EdgeInsets.only(bottom: 10),
                                           child: ListTile(
+                                            key: ValueKey<int>(
+                                                snapshot.data![index].id),
                                             leading: Icon(
                                               FluentIcons.clock_24_filled,
                                               color: Theme.of(context)

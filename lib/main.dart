@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +8,6 @@ import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Timer timer1 = Timer();
   late final AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
-  late DatabaseHandler databaseHandler;
+  DatabaseHandler databaseHandler = DatabaseHandler();
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
@@ -116,15 +113,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    this.databaseHandler = DatabaseHandler();
-    this.databaseHandler.initDatabase().whenComplete(() async {
-      await databaseHandler.insertData(timer1);
+
+    databaseHandler.initDatabase();
+    databaseHandler.initDatabase().whenComplete(() async {
+      await databaseHandler.insertData;
       setState(() {});
     });
-
     _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 60));
+            timer1.title = tcontroller.text;
+    timer1.timer = countText;
     controller.addListener(() {
       notify();
       if (controller.isAnimating) {
@@ -138,9 +137,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         });
       }
     });
-
-    tcontroller.text = timer1.title;
-    timer1.timer = countText;
+    
     // TODO: implement initState
   }
 
@@ -290,6 +287,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         onTap: () {
                           if (controller.isDismissed) {
                             showModalBottomSheet(
+                                isScrollControlled: true,
                                 backgroundColor:
                                     Theme.of(context).primaryColorDark,
                                 elevation: 10,
@@ -300,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 context: context,
                                 builder: (context) => SizedBox(
                                       width: size.width,
-                                      height: size.height * 0.8,
+                                      height: size.height * 0.65,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
@@ -371,7 +369,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         TextInputType.number,
                                                     validator: (value) {
                                                       if (value!.isEmpty) {
-                                                        return 'Enter the title';
+                                                        return 'Enter the ID Number';
                                                       }
                                                       return null;
                                                     },
@@ -460,9 +458,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             onTimerDurationChanged: (value) {
                                               setState(() {
                                                 controller.duration = value;
-                                                timer1.timer = controller
-                                                    .duration
-                                                    .toString();
+                                                timer1.timer = countText;
                                               });
                                             },
                                           ),
@@ -490,8 +486,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   countText);
                                               int success =
                                                   await databaseHandler
-                                                      .insertData(
-                                                          timer1);
+                                                      .insertData(timer1);
                                               if (success == 0) {
                                                 print('not successful');
                                               }
@@ -504,6 +499,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold),
                                             ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
                                           )
                                         ],
                                       ),

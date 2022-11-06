@@ -1,26 +1,39 @@
 import 'dart:core';
-import 'dart:io' show Directory;
-import 'timer.dart';
-import 'dart:async';
+import 'dart:io';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
+import 'timer.dart';
 
 class DatabaseHandler {
-  String DBNAME = 'Pomodoro.db';
+  String DBNAME = 'Pomo.db';
   String TABLE_NAME = 'Pomodoro';
   String COLUMN_ID = 'id';
   String COLUMN_TITLE = 'title';
   String COLUMN_TIMER = 'timer';
-  static late Database _database;
+  DatabaseHandler._createInstance();
+  static DatabaseHandler _handler = DatabaseHandler._createInstance();
+  Future<Directory?>? path;
   Future get database async {
-    _database ??= await initDatabase();
+    if (_database != null) {
+      return _database;
+    }
+    _database = await initDatabase();
     return _database;
   }
 
+  factory DatabaseHandler() {
+    if (_handler != null) {
+      return _handler = DatabaseHandler._createInstance();
+    }
+    return _handler;
+  }
+  static Database? _database = null;
   Future<Database> initDatabase() async {
-    var dir = await getDatabasesPath();
-    return openDatabase(join(dir, DBNAME),
+    Directory directory = await getApplicationDocumentsDirectory();
+    Database _database = await openDatabase(join(directory.path, DBNAME),
         version: 1, onCreate: createDatabase);
+    return _database;
   }
 
   Future createDatabase(Database db, int version) async {
@@ -30,7 +43,7 @@ class DatabaseHandler {
   }
 
   Future<int> insertData(Timer timer) async {
-    var db = await database;
+    final Database db = await database;
     return await db.insert(TABLE_NAME, timer.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
@@ -48,7 +61,7 @@ class DatabaseHandler {
 
   Future<List<Timer>> selectAllbooks() async {
     var db = await initDatabase();
-    var result = await db.query(TABLE_NAME, orderBy: COLUMN_ID);
+    var result = await db.query(TABLE_NAME);
 
     List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
     return alltimer;
