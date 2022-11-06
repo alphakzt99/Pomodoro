@@ -5,42 +5,34 @@ import 'dart:async';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
 
-
 class DatabaseHandler {
   String DBNAME = 'Pomodoro.db';
   String TABLE_NAME = 'Pomodoro';
   String COLUMN_ID = 'id';
   String COLUMN_TITLE = 'title';
-  String COLUMN_TIMER = 'time';
-  static late Database _database = DatabaseHandler._database;
-
-  Future<Database> get database async {
-    if (_database != null) {
-      return _database;
-    }
-    _database = await initDatabase();
+  String COLUMN_TIMER = 'timer';
+  static late Database _database;
+  Future get database async {
+    _database ??= await initDatabase();
     return _database;
   }
 
   Future<Database> initDatabase() async {
-   
     var dir = await getDatabasesPath();
-    String path = join(dir, DBNAME);
-    return openDatabase(path, version: 1, onCreate: createDatabase);
+    return openDatabase(join(dir, DBNAME),
+        version: 1, onCreate: createDatabase);
   }
 
-  Future createDatabase(Database db, int version) async{
+  Future createDatabase(Database db, int version) async {
     String sql =
-        'create table $TABLE_NAME($COLUMN_ID integer primary key,$COLUMN_TITLE text not null,$COLUMN_TIMER text not null)';
+        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
     await db.execute(sql);
   }
 
-  Future<int> insertData(int id,String title, String time) async {
+  Future<int> insertData(Timer timer) async {
     var db = await database;
-    return await db.rawInsert(
-        'INSERT INTO $TABLE_NAME($COLUMN_ID,$COLUMN_TITLE, $COLUMN_TIMER) VALUES(?, ?, ?)',
-        [id, title, time]);
-    ;
+    return await db.insert(TABLE_NAME, timer.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> deleteData(int id) async {
@@ -48,15 +40,15 @@ class DatabaseHandler {
     return await db.delete(TABLE_NAME, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> updateData(Timer timer) async {
+  Future<int> updateData(Timer time) async {
     var db = await database;
-    return await db.update(TABLE_NAME, timer.toMap(),
-        where: 'id = ?', whereArgs: [timer.id]);
+    return await db.update(TABLE_NAME, time.toMap(),
+        where: 'id = ?', whereArgs: [time.id]);
   }
 
   Future<List<Timer>> selectAllbooks() async {
     var db = await initDatabase();
-    var result = await db.query(TABLE_NAME);
+    var result = await db.query(TABLE_NAME, orderBy: COLUMN_ID);
 
     List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
     return alltimer;

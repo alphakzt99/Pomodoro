@@ -101,12 +101,15 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                           width: 200,
                                           height: 200,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(30),
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
                                               image: DecorationImage(
                                                   image: AssetImage(
                                                       "lib/photos/error.jpg"))),
                                         ),
-                                        SizedBox(height: 20,),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
                                         Text(
                                           "You have no data",
                                           style: TextStyle(
@@ -121,26 +124,27 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: ((context, index) {
                                         return Padding(
-                                          padding: EdgeInsets.only(bottom: 10),
+                                          padding:const  EdgeInsets.only(bottom: 10),
                                           child: ListTile(
                                             leading: Icon(
-                                              
                                               FluentIcons.clock_24_filled,
-                                              color: Theme.of(context).primaryColorLight,
+                                              color: Theme.of(context)
+                                                  .primaryColorLight,
                                             ),
                                             title: Text(
                                               snapshot.data![index].title,
                                               style: TextStyle(
-                                                  color: Theme.of(context).primaryColorLight,
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                             subtitle: Text(
-                                              
-                                              snapshot.data![index].time,
+                                              snapshot.data![index].timer,
                                               style: TextStyle(
-                                                color: Theme.of(context).primaryColorLight,
-                                                fontSize: 16),
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
+                                                  fontSize: 16),
                                             ),
                                           ),
                                         );
