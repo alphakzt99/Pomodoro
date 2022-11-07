@@ -33,12 +33,13 @@ class DatabaseHandler {
     Directory directory = await getApplicationDocumentsDirectory();
     Database _database = await openDatabase(join(directory.path, DBNAME),
         version: 1, onCreate: createDatabase);
+
     return _database;
   }
 
   Future createDatabase(Database db, int version) async {
     String sql =
-        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
+        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL);';
     await db.execute(sql);
   }
 
@@ -59,7 +60,7 @@ class DatabaseHandler {
         where: 'id = ?', whereArgs: [time.id]);
   }
 
-  Future<List<Timer>> selectAllbooks() async {
+  Future<List<Timer>> selectAllTimer() async {
     var db = await initDatabase();
     var result = await db.query(TABLE_NAME);
 

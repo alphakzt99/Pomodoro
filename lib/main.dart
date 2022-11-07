@@ -1,9 +1,10 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
-import 'package:flutter_ringtone_player/android_sounds.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
@@ -26,15 +27,16 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.black,
           primaryColorLight: Color(0xFF7AE582),
           primaryColorDark: Colors.white),
-      home: const MyHomePage(),
+      home: MyHomePage(
+        timer: Timer(),
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key,
-  });
+  final Timer timer;
+  const MyHomePage({super.key, required this.timer});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -81,9 +83,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColorLight,
                           fontWeight: FontWeight.bold),
                     ),
-                    onPressed: () {
-                      databaseHandler.insertData(timer1);
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      Timer time = Timer.withID(int.parse(tcontroller1.text),
+                          tcontroller.text, countText);
+                      await databaseHandler.insertData(time);
                     })
               ],
               context: context,
@@ -115,14 +118,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
 
     databaseHandler.initDatabase();
-    databaseHandler.initDatabase().whenComplete(() async {
-      await databaseHandler.insertData;
+    databaseHandler.initDatabase().whenComplete(() {
+      databaseHandler.insertData(timer1);
       setState(() {});
     });
     _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 60));
-            timer1.title = tcontroller.text;
+    timer1.title = tcontroller.text;
     timer1.timer = countText;
     controller.addListener(() {
       notify();
@@ -137,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         });
       }
     });
-    
+
     // TODO: implement initState
   }
 
@@ -199,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColor,
                           fontSize: 20,
                           fontWeight: FontWeight.bold)),
-                  TextSpan(
+                  const TextSpan(
                       text: "Level 1",
                       style: TextStyle(
                           color: Colors.black54,
@@ -208,23 +211,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ])),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.person_accounts_24_regular),
-                  title: Text("My Account"),
+                  leading: const Icon(FluentIcons.person_accounts_24_regular),
+                  title: const Text("My Account"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.history_24_regular),
-                  title: Text("Pomodoro List"),
+                  leading: const Icon(FluentIcons.history_24_regular),
+                  title: const Text("Pomodoro List"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.settings_24_regular),
-                  title: Text("Settings"),
+                  leading: const Icon(FluentIcons.settings_24_regular),
+                  title: const Text("Settings"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.contact_card_24_regular),
-                  title: Text("Contact Us"),
+                  leading: const Icon(FluentIcons.contact_card_24_regular),
+                  title: const Text("Contact Us"),
                 ),
               ],
             ),
@@ -472,24 +475,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             color:
                                                 Theme.of(context).primaryColor,
                                             onPressed: () async {
-                                              Navigator.pop(context);
-                                              if (key.currentState!
+                                              if (!key.currentState!
                                                   .validate()) {
                                                 return;
                                               }
-                                              await databaseHandler
-                                                  .insertData(timer1);
 
-                                              Timer timer = Timer.withID(
+                                              Timer time = Timer.withID(
                                                   int.parse(tcontroller1.text),
                                                   tcontroller.text,
                                                   countText);
-                                              int success =
-                                                  await databaseHandler
-                                                      .insertData(timer1);
-                                              if (success == 0) {
-                                                print('not successful');
-                                              }
+                                              await databaseHandler
+                                                  .insertData(time);
+
+                                              Navigator.pop(context);
                                             },
                                             child: Text(
                                               "Confirm",
