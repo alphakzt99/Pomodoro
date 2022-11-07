@@ -1,20 +1,20 @@
 import 'dart:core';
-import 'dart:io' show Directory;
-import 'timer.dart';
-import 'dart:async';
+import 'dart:io';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'timer.dart';
 
 class DatabaseHandler {
-  String DBNAME = 'Pomodoro.db';
+  String DBNAME = 'Pomo.db';
   String TABLE_NAME = 'Pomodoro';
   String COLUMN_ID = 'id';
   String COLUMN_TITLE = 'title';
-  String COLUMN_TIMER = 'time';
-  static late Database _database = DatabaseHandler._database;
-
-  Future<Database> get database async {
+  String COLUMN_TIMER = 'timer';
+  DatabaseHandler._createInstance();
+  static DatabaseHandler _handler = DatabaseHandler._createInstance();
+  Future<Directory?>? path;
+  Future get database async {
     if (_database != null) {
       return _database;
     }
@@ -22,25 +22,31 @@ class DatabaseHandler {
     return _database;
   }
 
+  factory DatabaseHandler() {
+    if (_handler != null) {
+      return _handler = DatabaseHandler._createInstance();
+    }
+    return _handler;
+  }
+  static Database? _database = null;
   Future<Database> initDatabase() async {
-   
-    var dir = await getDatabasesPath();
-    String path = join(dir, DBNAME);
-    return openDatabase(path, version: 1, onCreate: createDatabase);
+    Directory directory = await getApplicationDocumentsDirectory();
+    Database _database = await openDatabase(join(directory.path, DBNAME),
+        version: 1, onCreate: createDatabase);
+
+    return _database;
   }
 
-  Future createDatabase(Database db, int version) async{
+  Future createDatabase(Database db, int version) async {
     String sql =
-        'create table $TABLE_NAME($COLUMN_ID integer primary key,$COLUMN_TITLE text not null,$COLUMN_TIMER text not null)';
+        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL);';
     await db.execute(sql);
   }
 
-  Future<int> insertData(int id,String title, String time) async {
-    var db = await database;
-    return await db.rawInsert(
-        'INSERT INTO $TABLE_NAME($COLUMN_ID,$COLUMN_TITLE, $COLUMN_TIMER) VALUES(?, ?, ?)',
-        [id, title, time]);
-    ;
+  Future<int> insertData(Timer timer) async {
+    final Database db = await database;
+    return await db.insert(TABLE_NAME, timer.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> deleteData(int id) async {
@@ -48,13 +54,13 @@ class DatabaseHandler {
     return await db.delete(TABLE_NAME, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> updateData(Timer timer) async {
+  Future<int> updateData(Timer time) async {
     var db = await database;
-    return await db.update(TABLE_NAME, timer.toMap(),
-        where: 'id = ?', whereArgs: [timer.id]);
+    return await db.update(TABLE_NAME, time.toMap(),
+        where: 'id = ?', whereArgs: [time.id]);
   }
 
-  Future<List<Timer>> selectAllbooks() async {
+  Future<List<Timer>> selectAllTimer() async {
     var db = await initDatabase();
     var result = await db.query(TABLE_NAME);
 

@@ -1,7 +1,8 @@
+import 'dart:async';
+import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
-import 'package:sqflite/sqflite.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -11,11 +12,29 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  late DatabaseHandler handler;
+  DatabaseHandler handler = DatabaseHandler();
+  ScrollController controller = ScrollController();
+  Timer timer = Timer();
+  final Stream<List<Timer>> _bids = (() {
+    late final StreamController<List<Timer>> controller;
+    DatabaseHandler handler = DatabaseHandler();
+    controller = StreamController<List<Timer>>(
+      onListen: () async {
+        handler.selectAllTimer().asStream();
+      },
+    );
+    return controller.stream;
+  })();
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
+    handler.selectAllTimer();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -64,87 +83,81 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
-                FutureBuilder(
-                    future: handler.selectAllbooks(),
+                StreamBuilder<List<Timer>>(
+               
+                    stream: _bids,
                     builder: ((context, snapshot) {
-                      return snapshot.connectionState != ConnectionState.done
-                          ? Center(
-                              child: Column(children: [
-                                CircularProgressIndicator(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  color: Theme.of(context).primaryColorDark,
-                                ),
-                                Text(
-                                  "Loading",
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ]),
-                            )
-                          : Container(
+                      return !snapshot.hasData
+                          ? SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: snapshot.data!.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 200,
-                                          height: 200,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(30),
-                                              image: DecorationImage(
-                                                  image: AssetImage(
-                                                      "lib/photos/error.jpg"))),
-                                        ),
-                                        SizedBox(height: 20,),
-                                        Text(
-                                          "You have no data",
-                                          style: TextStyle(
+                              child: snapshot.connectionState !=
+                                      ConnectionState.waiting
+                                  ? Center(
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            CircularProgressIndicator(
+                                              backgroundColor: Theme.of(context)
+                                                  .primaryColor,
                                               color: Theme.of(context)
-                                                  .primaryColorLight,
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
+                                                  .primaryColorDark,
+                                            ),
+                                            SizedBox(
+                                              height: 30,
+                                            ),
+                                            Text(
+                                              "Loading...",
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ]),
                                     )
                                   : ListView.builder(
+                                      shrinkWrap: true,
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: ((context, index) {
                                         return Padding(
-                                          padding: EdgeInsets.only(bottom: 10),
+                                          padding:
+                                              const EdgeInsets.only(bottom: 10),
                                           child: ListTile(
+                                            key: ValueKey<int>(snapshot.data![index].id),
                                             leading: Icon(
-                                              
                                               FluentIcons.clock_24_filled,
-                                              color: Theme.of(context).primaryColorLight,
+                                              color: Theme.of(context)
+                                                  .primaryColorLight,
                                             ),
                                             title: Text(
                                               snapshot.data![index].title,
                                               style: TextStyle(
-                                                  color: Theme.of(context).primaryColorLight,
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                             subtitle: Text(
-                                              
-                                              snapshot.data![index].time,
+                                              snapshot.data![index].timer,
                                               style: TextStyle(
-                                                color: Theme.of(context).primaryColorLight,
-                                                fontSize: 16),
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
+                                                  fontSize: 16),
                                             ),
                                           ),
                                         );
                                       })),
+                            )
+                          : Container(
+                              child: Text(
+                                "Hello",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             );
                     }))
               ]),

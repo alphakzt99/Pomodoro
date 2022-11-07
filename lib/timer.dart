@@ -1,38 +1,30 @@
-import 'package:flutter/material.dart';
 
 class Timer {
   int id = 1;
   String title = '';
-  String time= '';
-  
+  String timer = '';
   int get getId => id;
 
   set setId(int id) => this.id = id;
 
   String get getTitle => title;
 
-  set setTitle(String title) => this.title = title;
+  set getTitle(String title) => this.title = title;
 
-  String get getDateTime => time;
+  String get gettimer => timer;
 
-  set setDateTime(String time) => this.time = time;
-
-  
+  set settimer(String timer) => this.timer = timer;
   Timer();
   Timer.withID(
     this.id,
     this.title,
-    this.time,
-  );
-  Timer.withoutID(
-    this.title,
-    this.time,
+    this.timer,
   );
 
-  Map<String, dynamic> toMap() => {'title': title, 'timer': time};
   Timer.fromMap(Map<String, dynamic> map) {
-  
+    id = map['id'];
     title = map['title'];
-    time = map['timer'];
+    timer = map['timer'];
   }
+  Map<String, Object> toMap() => {'id': id, 'title': title, 'timer': timer};
 }
