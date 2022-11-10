@@ -12,20 +12,19 @@ class DatabaseHandler {
   String COLUMN_TITLE = 'title';
   String COLUMN_TIMER = 'timer';
 
-  late DatabaseHandler _handler;
+  late DatabaseHandler handler;
 
   late Database _database;
 
   Future<Database> initDatabase() async {
     var path = await getDatabasesPath();
-    return await openDatabase(join(path, DBNAME),
-        version: 1, onCreate: createDatabase);
-  }
-
-  Future createDatabase(Database db, int version) async {
-    String sql =
-        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
-    await db.execute(sql);
+    _database = await openDatabase(join(path, DBNAME), version: 1,
+        onCreate: ((db, version) async {
+      String sql =
+          'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
+      await db.execute(sql);
+    }));
+    return _database;
   }
 
   Future<int> insertData(Timer timer) async {

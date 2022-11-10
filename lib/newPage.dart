@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -12,23 +13,14 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  DatabaseHandler handler = DatabaseHandler();
+  late DatabaseHandler handler;
   ScrollController controller = ScrollController();
   Timer timer = Timer();
-  final Stream<List<Timer>> _bids = (() {
-    late final StreamController<List<Timer>> controller;
-    DatabaseHandler handler = DatabaseHandler();
-    controller = StreamController<List<Timer>>(
-      onListen: () async {
-        handler.selectAllTimer().asStream();
-      },
-    );
-    return controller.stream;
-  })();
+
   @override
   void initState() {
     super.initState();
-    handler.selectAllTimer();
+    handler = DatabaseHandler();
   }
 
   @override
@@ -59,7 +51,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
       body: ListTileTheme(
         style: ListTileStyle.list,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        tileColor: Theme.of(context).primaryColorDark,
+        tileColor: Theme.of(context).primaryColor,
         iconColor: Theme.of(context).primaryColor,
         textColor: Theme.of(context).primaryColor,
         contentPadding: const EdgeInsets.only(
@@ -86,14 +78,14 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                 const SizedBox(
                   height: 10,
                 ),
-                StreamBuilder<List<Timer>>(
-                    stream: _bids,
+                FutureBuilder<List<Timer>>(
+                    future: handler.selectAllTimer(),
                     builder: ((context, snapshot) {
                       return snapshot.hasData
                           ? SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: snapshot.connectionState !=
+                              child: snapshot.connectionState ==
                                       ConnectionState.waiting
                                   ? Center(
                                       child: Column(
@@ -126,28 +118,53 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                         return Padding(
                                           padding:
                                               const EdgeInsets.only(bottom: 10),
-                                          child: ListTile(
+                                          child: SwipeActionCell(
+                                            backgroundColor: Colors.black,
                                             key: ValueKey<int>(
                                                 snapshot.data![index].id),
-                                            leading: Icon(
-                                              FluentIcons.clock_24_filled,
-                                              color: Theme.of(context)
-                                                  .primaryColorLight,
-                                            ),
-                                            title: Text(
-                                              snapshot.data![index].title,
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorLight,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            subtitle: Text(
-                                              snapshot.data![index].timer,
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorLight,
-                                                  fontSize: 16),
+                                            trailingActions: [
+                                              SwipeAction(
+                                                style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                                backgroundRadius: 5,
+                                                color: Colors.white,
+                                                title: "Delete",
+                                                icon: const Icon(
+                                                  FluentIcons.delete_32_regular,
+                                                  color: Colors.red,
+                                                ),
+                                                onTap: ((p0) {
+                                                  handler.deleteData(
+                                                      snapshot.data![index].id);
+                                                  setState(() {});
+                                                }),
+                                              )
+                                            ],
+                                            child: ListTile(
+                                              leading: Icon(
+                                                FluentIcons.clock_24_filled,
+                                                color: Theme.of(context)
+                                                    .primaryColorDark,
+                                              ),
+                                              title: Text(
+                                                snapshot.data![index].title,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .primaryColorDark,
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              subtitle: Text(
+                                                snapshot.data![index].timer,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .primaryColorDark,
+                                                    fontSize: 16),
+                                              ),
                                             ),
                                           ),
                                         );

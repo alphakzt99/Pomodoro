@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
+
   bool isCounting = false;
   notify() {
     if (controller.isDismissed) {
