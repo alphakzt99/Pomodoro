@@ -1,16 +1,14 @@
-import 'dart:io';
+import 'dart:async';
+import 'dart:ffi';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
-import 'package:flutter_ringtone_player/android_sounds.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,15 +27,16 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.black,
           primaryColorLight: Color(0xFF7AE582),
           primaryColorDark: Colors.white),
-      home: const MyHomePage(),
+      home: MyHomePage(
+        timer: Timer(),
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key,
-  });
+  final Timer timer;
+  const MyHomePage({super.key, required this.timer});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -47,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Timer timer1 = Timer();
   late final AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
-  late DatabaseHandler databaseHandler;
+  DatabaseHandler databaseHandler = DatabaseHandler();
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed
@@ -71,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColorLight,
                           fontWeight: FontWeight.bold),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).pop();
                     }),
                 DialogButton(
@@ -84,8 +83,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColorLight,
                           fontWeight: FontWeight.bold),
                     ),
-                    onPressed: () {
-                      databaseHandler.insertData(timer1.id,timer1.title, timer1.time);
+                    onPressed: () async {
+                      Timer time = Timer.withID(int.parse(tcontroller1.text),
+                          tcontroller.text, countText);
+                      await databaseHandler.insertData(time);
+                      setState(() {});
                       Navigator.of(context).pop();
                     })
               ],
@@ -116,15 +118,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    databaseHandler = DatabaseHandler();
-    databaseHandler.initDatabase().whenComplete(() async {
-      await databaseHandler.insertData(timer1.id,timer1.title, timer1.time);
+
+    databaseHandler.initDatabase();
+    databaseHandler.initDatabase().whenComplete(() {
+      databaseHandler.insertData(timer1);
       setState(() {});
     });
-
     _advancedDrawerController = AdvancedDrawerController();
     controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 60));
+        AnimationController(vsync: this, duration: const Duration(seconds: 60));
+    timer1.title = tcontroller.text;
+    timer1.timer = countText;
     controller.addListener(() {
       notify();
       if (controller.isAnimating) {
@@ -139,8 +143,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     });
 
-    tcontroller.text = timer1.title;
-    timer1.time = countText;
     // TODO: implement initState
   }
 
@@ -202,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColor,
                           fontSize: 20,
                           fontWeight: FontWeight.bold)),
-                  TextSpan(
+                  const TextSpan(
                       text: "Level 1",
                       style: TextStyle(
                           color: Colors.black54,
@@ -211,23 +213,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ])),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.person_accounts_24_regular),
-                  title: Text("My Account"),
+                  leading: const Icon(FluentIcons.person_accounts_24_regular),
+                  title: const Text("My Account"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.history_24_regular),
-                  title: Text("Pomodoro List"),
+                  leading: const Icon(FluentIcons.history_24_regular),
+                  title: const Text("Pomodoro List"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.settings_24_regular),
-                  title: Text("Settings"),
+                  leading: const Icon(FluentIcons.settings_24_regular),
+                  title: const Text("Settings"),
                 ),
                 ListTile(
                   onTap: () {},
-                  leading: Icon(FluentIcons.contact_card_24_regular),
-                  title: Text("Contact Us"),
+                  leading: const Icon(FluentIcons.contact_card_24_regular),
+                  title: const Text("Contact Us"),
                 ),
               ],
             ),
@@ -290,6 +292,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         onTap: () {
                           if (controller.isDismissed) {
                             showModalBottomSheet(
+                                isScrollControlled: true,
                                 backgroundColor:
                                     Theme.of(context).primaryColorDark,
                                 elevation: 10,
@@ -298,9 +301,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         topLeft: Radius.circular(20),
                                         topRight: Radius.circular(20))),
                                 context: context,
-                                builder: (context) => Container(
+                                builder: (context) => SizedBox(
                                       width: size.width,
-                                      height: size.height * 0.8,
+                                      height: size.height * 0.65,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
@@ -309,8 +312,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             key: key,
                                             child: Container(
                                               width: size.width,
-                                              margin: EdgeInsets.symmetric(
-                                                  horizontal: 20, vertical: 10),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10),
                                               padding: EdgeInsets.all(10),
                                               child: Column(
                                                 children: [
@@ -329,8 +334,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     decoration: changed1 == true
                                                         ? InputDecoration(
                                                             contentPadding:
-                                                                EdgeInsets.all(
-                                                                    10),
+                                                                const EdgeInsets
+                                                                    .all(10),
                                                             labelText: "ID",
                                                             labelStyle: TextStyle(
                                                                 color: Theme.of(
@@ -342,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                                         .bold),
                                                             hintText:
                                                                 "ID Number",
-                                                            hintStyle: TextStyle(
+                                                            hintStyle: const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 16,
@@ -350,7 +355,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                                     FontStyle
                                                                         .italic),
                                                           )
-                                                        : InputDecoration(
+                                                        : const InputDecoration(
                                                             contentPadding:
                                                                 EdgeInsets.all(
                                                                     10),
@@ -369,7 +374,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         TextInputType.number,
                                                     validator: (value) {
                                                       if (value!.isEmpty) {
-                                                        return 'Enter the title';
+                                                        return 'Enter the ID Number';
                                                       }
                                                       return null;
                                                     },
@@ -392,8 +397,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     decoration: changed == true
                                                         ? InputDecoration(
                                                             contentPadding:
-                                                                EdgeInsets.all(
-                                                                    10),
+                                                                const EdgeInsets
+                                                                    .all(10),
                                                             labelText: "Title",
                                                             labelStyle: TextStyle(
                                                                 color: Theme.of(
@@ -404,7 +409,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                                     FontWeight
                                                                         .bold),
                                                             hintText: "Title",
-                                                            hintStyle: TextStyle(
+                                                            hintStyle: const TextStyle(
                                                                 color: Colors
                                                                     .black54,
                                                                 fontSize: 16,
@@ -412,7 +417,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                                     FontStyle
                                                                         .italic),
                                                           )
-                                                        : InputDecoration(
+                                                        : const InputDecoration(
                                                             contentPadding:
                                                                 EdgeInsets.all(
                                                                     10),
@@ -434,9 +439,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                       }
                                                       return null;
                                                     },
-                                                    onFieldSubmitted:
-                                                        ((value) =>
-                                                            tcontroller.text),
+                                                    onFieldSubmitted: ((value) {
+                                                      tcontroller.text = value;
+                                                      timer1.title =
+                                                          tcontroller.text;
+                                                    }),
                                                   ),
                                                 ],
                                               ),
@@ -456,6 +463,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             onTimerDurationChanged: (value) {
                                               setState(() {
                                                 controller.duration = value;
+                                                timer1.timer = countText;
                                               });
                                             },
                                           ),
@@ -469,27 +477,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             color:
                                                 Theme.of(context).primaryColor,
                                             onPressed: () async {
-                                              Navigator.pop(context);
-                                              if (key.currentState!
+                                              if (!key.currentState!
                                                   .validate()) {
                                                 return;
                                               }
-                                              await databaseHandler.insertData(
-                                                  int.parse(tcontroller1.text),
-                                                  tcontroller.text, countText);
 
-                                              Timer timer = Timer.withID(
-                                                int.parse(tcontroller1.text),
-                                                  tcontroller.text, countText);
-                                              int success =
-                                                  await databaseHandler
-                                                      .insertData(
-                                                        int.parse(tcontroller1.text),
-                                                          tcontroller.text,
-                                                          countText);
-                                              if (success == 0) {
-                                                print('not successful');
-                                              }
+                                              Timer time = Timer.withID(
+                                                  int.parse(tcontroller1.text),
+                                                  tcontroller.text,
+                                                  countText);
+                                              await databaseHandler
+                                                  .insertData(time);
+
+                                              Navigator.pop(context);
                                             },
                                             child: Text(
                                               "Confirm",
@@ -499,6 +499,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold),
                                             ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
                                           )
                                         ],
                                       ),

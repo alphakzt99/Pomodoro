@@ -1,62 +1,56 @@
 import 'dart:core';
-import 'dart:io' show Directory;
-import 'timer.dart';
-import 'dart:async';
+import 'dart:io';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'timer.dart';
 
 class DatabaseHandler {
-  String DBNAME = 'Pomodoro.db';
+  String DBNAME = 'Pomo.db';
   String TABLE_NAME = 'Pomodoro';
   String COLUMN_ID = 'id';
   String COLUMN_TITLE = 'title';
-  String COLUMN_TIMER = 'time';
-  static late Database _database = DatabaseHandler._database;
+  String COLUMN_TIMER = 'timer';
 
-  Future<Database> get database async {
-    if (_database != null) {
-      return _database;
-    }
-    _database = await initDatabase();
-    return _database;
-  }
+  late DatabaseHandler _handler;
+
+  late Database _database;
 
   Future<Database> initDatabase() async {
-   
-    var dir = await getDatabasesPath();
-    String path = join(dir, DBNAME);
-    return openDatabase(path, version: 1, onCreate: createDatabase);
+    var path = await getDatabasesPath();
+    return await openDatabase(join(path, DBNAME),
+        version: 1, onCreate: createDatabase);
   }
 
-  Future createDatabase(Database db, int version) async{
+  Future createDatabase(Database db, int version) async {
     String sql =
-        'create table $TABLE_NAME($COLUMN_ID integer primary key,$COLUMN_TITLE text not null,$COLUMN_TIMER text not null)';
+        'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL)';
     await db.execute(sql);
   }
 
-  Future<int> insertData(int id,String title, String time) async {
-    var db = await database;
-    return await db.rawInsert(
-        'INSERT INTO $TABLE_NAME($COLUMN_ID,$COLUMN_TITLE, $COLUMN_TIMER) VALUES(?, ?, ?)',
-        [id, title, time]);
-    ;
+  Future<int> insertData(Timer timer) async {
+    await initDatabase();
+    return await _database.insert(TABLE_NAME, timer.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> deleteData(int id) async {
-    var db = await database;
-    return await db.delete(TABLE_NAME, where: 'id = ?', whereArgs: [id]);
+    await initDatabase();
+    return await _database.delete(TABLE_NAME, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> updateData(Timer timer) async {
-    var db = await database;
-    return await db.update(TABLE_NAME, timer.toMap(),
-        where: 'id = ?', whereArgs: [timer.id]);
+  Future<int> updateData(Timer time) async {
+    await initDatabase();
+    return await _database.update(TABLE_NAME, time.toMap(),
+        where: 'id = ?', whereArgs: [time.id]);
   }
 
-  Future<List<Timer>> selectAllbooks() async {
-    var db = await initDatabase();
-    var result = await db.query(TABLE_NAME);
+  Future<void> deleteDatabase(String path) =>
+      databaseFactory.deleteDatabase(path);
+
+  Future<List<Timer>> selectAllTimer() async {
+    await initDatabase();
+    var result = await _database.query(TABLE_NAME);
 
     List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
     return alltimer;
