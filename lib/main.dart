@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           color: Theme.of(context).primaryColorLight,
                           fontWeight: FontWeight.bold),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).pop();
                     }),
                 DialogButton(
@@ -87,6 +87,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       Timer time = Timer.withID(int.parse(tcontroller1.text),
                           tcontroller.text, countText);
                       await databaseHandler.insertData(time);
+                      setState(() {});
+                      Navigator.of(context).pop();
                     })
               ],
               context: context,

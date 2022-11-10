@@ -87,10 +87,9 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                   height: 10,
                 ),
                 StreamBuilder<List<Timer>>(
-               
                     stream: _bids,
                     builder: ((context, snapshot) {
-                      return !snapshot.hasData
+                      return snapshot.hasData
                           ? SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
@@ -128,7 +127,8 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                           padding:
                                               const EdgeInsets.only(bottom: 10),
                                           child: ListTile(
-                                            key: ValueKey<int>(snapshot.data![index].id),
+                                            key: ValueKey<int>(
+                                                snapshot.data![index].id),
                                             leading: Icon(
                                               FluentIcons.clock_24_filled,
                                               color: Theme.of(context)
@@ -154,9 +154,25 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                       })),
                             )
                           : Container(
-                              child: Text(
-                                "Hello",
-                                style: TextStyle(color: Colors.white),
+                              width: size.width * 0.8,
+                              height: size.height * 0.7,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Image(
+                                      width: 200,
+                                      height: 200,
+                                      image:
+                                          AssetImage("lib/photos/error.jpg")),
+                                  Text(
+                                    "No Data Available",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
                             );
                     }))
