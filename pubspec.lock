@@ -113,6 +113,13 @@ packages:
       url: "https://github.com/aarajput/flutter_ringtone_player.git"
     source: git
     version: "3.0.0"
+  flutter_swipe_action_cell:
+    dependency: "direct main"
+    description:
+      name: flutter_swipe_action_cell
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
