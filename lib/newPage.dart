@@ -4,6 +4,7 @@ import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -33,9 +34,9 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).primaryColorDark,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).primaryColorDark,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -44,7 +45,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
           icon: Icon(
             FluentIcons.arrow_circle_left_24_regular,
             size: 32,
-            color: Theme.of(context).primaryColorLight,
+            color: Theme.of(context).primaryColor,
           ),
         ),
       ),
@@ -52,8 +53,8 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
         style: ListTileStyle.list,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         tileColor: Theme.of(context).primaryColor,
-        iconColor: Theme.of(context).primaryColor,
-        textColor: Theme.of(context).primaryColor,
+        iconColor: Theme.of(context).primaryColorLight,
+        textColor: Theme.of(context).primaryColorLight,
         contentPadding: const EdgeInsets.only(
           left: 20,
           top: 10,
@@ -71,17 +72,18 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                 Text(
                   "Pomodoro List",
                   style: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme.of(context).primaryColor,
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(
-                  height: 10,
+                  height: 30,
                 ),
                 FutureBuilder<List<Timer>>(
                     future: handler.selectAllTimer(),
                     builder: ((context, snapshot) {
-                      return snapshot.hasData
+                      var data = snapshot.data;
+                      return data!.isNotEmpty
                           ? SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
@@ -115,45 +117,97 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                       shrinkWrap: true,
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: ((context, index) {
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 10),
-                                          child: SwipeActionCell(
-                                            backgroundColor: Colors.black,
-                                            key: ValueKey<int>(
-                                                snapshot.data![index].id),
-                                            trailingActions: [
-                                              SwipeAction(
-                                                style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                                backgroundRadius: 5,
-                                                color: Colors.white,
-                                                title: "Delete",
-                                                icon: const Icon(
-                                                  FluentIcons.delete_32_regular,
-                                                  color: Colors.red,
-                                                ),
-                                                onTap: ((p0) {
-                                                  handler.deleteData(
-                                                      snapshot.data![index].id);
-                                                  setState(() {});
-                                                }),
-                                              )
-                                            ],
+                                        return Dismissible(
+                                          key: ValueKey<int>(snapshot.data![index].id),
+                                          onDismissed: ((direction) {
+                                            Alert(
+                                                  
+                                                  context: context,
+                                                  title: "Alert",
+                                                  desc:
+                                                      "Do you want to delete this note?",
+                                                  style: AlertStyle(
+                                                      backgroundColor:
+                                                          Theme.of(context)
+                                                              .primaryColor,
+                                                      alertAlignment:
+                                                          Alignment.topCenter,
+                                                      alertBorder: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  20)),
+                                                      descStyle: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .primaryColorLight,
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                      titleStyle: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .primaryColorLight,
+                                                          fontSize: 24,
+                                                          fontWeight:
+                                                              FontWeight.w300)),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 30,
+                                                      vertical: 10),
+                                                  buttons: [
+                                                    DialogButton(
+                                                      color: Colors.black,
+                                                        child: Text("Dismiss",
+                                                            style: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorLight,
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400)),
+                                                        onPressed: () {
+                                                          Navigator.
+                                                              pop(context);
+                                                        }),
+                                                    DialogButton(
+                                                      color: Colors.black,
+                                                        child: Text("Confrim",
+                                                            style: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorLight,
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400)),
+                                                        onPressed: () {
+                                                          handler
+                                                              .deleteData(
+                                                                snapshot.data![index].id
+                                                                 );
+                                                          setState(() {
+                                                            
+                                                          });
+                                                        })
+                                                  ]).show();
+                                          }),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(bottom: 10),
                                             child: ListTile(
+                                              tileColor: Colors.black,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20)),
                                               leading: Icon(
                                                 FluentIcons.clock_24_filled,
                                                 color: Theme.of(context)
-                                                    .primaryColorDark,
+                                                    .primaryColorLight,
                                               ),
                                               title: Text(
                                                 snapshot.data![index].title,
                                                 style: TextStyle(
                                                     color: Theme.of(context)
-                                                        .primaryColorDark,
+                                                        .primaryColorLight,
                                                     fontSize: 24,
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -162,7 +216,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                                 snapshot.data![index].timer,
                                                 style: TextStyle(
                                                     color: Theme.of(context)
-                                                        .primaryColorDark,
+                                                        .primaryColorLight,
                                                     fontSize: 16),
                                               ),
                                             ),
