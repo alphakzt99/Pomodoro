@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -53,7 +52,6 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
       body: ListTileTheme(
         style: ListTileStyle.list,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        
         iconColor: Theme.of(context).primaryColorLight,
         textColor: Theme.of(context).primaryColorLight,
         contentPadding: const EdgeInsets.only(
@@ -100,7 +98,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                               color: Theme.of(context)
                                                   .primaryColorDark,
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 30,
                                             ),
                                             Text(
@@ -121,7 +119,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                           padding:
                                               const EdgeInsets.only(bottom: 10),
                                           child: SwipeActionCell(
-                                           backgroundColor: Colors.white,
+                                            backgroundColor: Colors.white,
                                             key: ValueKey<int>(
                                                 snapshot.data![index].id),
                                             trailingActions: [
@@ -286,7 +284,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                 ],
                               ),
                             );
-                    }))
+}))
               ]),
         ),
       ),

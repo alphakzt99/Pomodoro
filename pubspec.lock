@@ -104,15 +104,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-  flutter_ringtone_player:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "issue/android_v2_embedding"
-      resolved-ref: "831aa1956be1eeb3d8a5d43cb2f87d4c47df54d3"
-      url: "https://github.com/aarajput/flutter_ringtone_player.git"
-    source: git
-    version: "3.0.0"
   flutter_swipe_action_cell:
     dependency: "direct main"
     description:
