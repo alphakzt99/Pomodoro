@@ -5,6 +5,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+import 'package:intl/intl.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
@@ -64,61 +65,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   TextEditingController tcontroller = TextEditingController();
   TextEditingController tcontroller1 = TextEditingController();
   bool isCounting = false;
-  notify() {
-    if (controller.isDismissed) {
-      Alert(
-              context: context,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              buttons: [
-                DialogButton(
-                    radius: BorderRadius.circular(20),
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      "Dismiss",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColorLight,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                    }),
-                DialogButton(
-                    radius: BorderRadius.circular(20),
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      "Save",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColorLight,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      Timer time = Timer.withID(int.parse(tcontroller1.text),
-                          tcontroller.text, countText);
-                      await databaseHandler.insertData(time);
-                      setState(() {});
-                      Navigator.of(context).pop();
-                    })
-              ],
-              style: AlertStyle(
-                  descStyle: TextStyle(
-                    color: Theme.of(context).primaryColorLight,
-                    fontSize: 16,
-                  ),
-                  titleStyle: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  alertAlignment: Alignment.topCenter,
-                  alertBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-              title: "Alert",
-              desc: "Pomodoro timer is up.Rest and continue later.")
-          .show();
-    }
-  }
 
   var key = GlobalKey<FormState>();
 
@@ -149,7 +95,60 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           isCounting = false;
         });
       }
-      notify();
+      if (controller.isDismissed) {
+        Alert(
+                context: context,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                buttons: [
+                  DialogButton(
+                      radius: BorderRadius.circular(20),
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        "Dismiss",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).primaryColorLight,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                      }),
+                  DialogButton(
+                      radius: BorderRadius.circular(20),
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        "Save",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).primaryColorLight,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        Timer time = Timer.withID(int.parse(tcontroller1.text),
+                            tcontroller.text, countText,DateFormat.yMMMEd().format(DateTime.now()));
+                        await databaseHandler.insertData(time);
+                        setState(() {});
+                        Navigator.of(context).pop();
+                      })
+                ],
+                style: AlertStyle(
+                    descStyle: TextStyle(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 16,
+                    ),
+                    titleStyle: TextStyle(
+                        color: Theme.of(context).primaryColorLight,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    alertAlignment: Alignment.topCenter,
+                    alertBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
+                title: "Alert",
+                desc: "Pomodoro timer is up.Rest and continue later.")
+            .show();
+      }
     });
 
     // TODO: implement initState
@@ -175,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
         body: AdvancedDrawer(
       childDecoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
       controller: _advancedDrawerController,
