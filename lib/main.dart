@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
+
   bool isCounting = false;
   notify() {
     if (controller.isDismissed) {
@@ -212,24 +213,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           fontWeight: FontWeight.bold))
                 ])),
                 ListTile(
+                  
                   onTap: () {},
                   leading: const Icon(FluentIcons.person_accounts_24_regular),
-                  title: const Text("My Account"),
+                  title: const Text("My Account",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
                 ),
                 ListTile(
                   onTap: () {},
                   leading: const Icon(FluentIcons.history_24_regular),
-                  title: const Text("Pomodoro List"),
+                  title: const Text("Pomodoro List",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
                 ),
                 ListTile(
                   onTap: () {},
                   leading: const Icon(FluentIcons.settings_24_regular),
-                  title: const Text("Settings"),
+                  title: const Text("Settings",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
                 ),
                 ListTile(
                   onTap: () {},
                   leading: const Icon(FluentIcons.contact_card_24_regular),
-                  title: const Text("Contact Us"),
+                  title: const Text("Contact Us",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

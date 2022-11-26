@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class newPage extends StatefulWidget {
   const newPage({super.key});
@@ -12,28 +14,20 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  DatabaseHandler handler = DatabaseHandler();
+  late DatabaseHandler handler;
   ScrollController controller = ScrollController();
   Timer timer = Timer();
-  final Stream<List<Timer>> _bids = (() {
-    late final StreamController<List<Timer>> controller;
-    DatabaseHandler handler = DatabaseHandler();
-    controller = StreamController<List<Timer>>(
-      onListen: () async {
-        handler.selectAllTimer().asStream();
-      },
-    );
-    return controller.stream;
-  })();
+
   @override
   void initState() {
     super.initState();
-    handler.selectAllTimer();
+    handler = DatabaseHandler();
   }
 
   @override
   void dispose() {
     controller.dispose();
+
     super.dispose();
   }
 
@@ -41,9 +35,9 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).primaryColorDark,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).primaryColorDark,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -52,16 +46,16 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
           icon: Icon(
             FluentIcons.arrow_circle_left_24_regular,
             size: 32,
-            color: Theme.of(context).primaryColorLight,
+            color: Theme.of(context).primaryColor,
           ),
         ),
       ),
       body: ListTileTheme(
         style: ListTileStyle.list,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        tileColor: Theme.of(context).primaryColorDark,
-        iconColor: Theme.of(context).primaryColor,
-        textColor: Theme.of(context).primaryColor,
+        
+        iconColor: Theme.of(context).primaryColorLight,
+        textColor: Theme.of(context).primaryColorLight,
         contentPadding: const EdgeInsets.only(
           left: 20,
           top: 10,
@@ -79,21 +73,21 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                 Text(
                   "Pomodoro List",
                   style: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme.of(context).primaryColor,
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(
-                  height: 10,
+                  height: 30,
                 ),
-                StreamBuilder<List<Timer>>(
-                    stream: _bids,
+                FutureBuilder<List<Timer>>(
+                    future: handler.selectAllTimer(),
                     builder: ((context, snapshot) {
-                      return snapshot.hasData
+                      return snapshot.data != 0
                           ? SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: snapshot.connectionState !=
+                              child: snapshot.connectionState ==
                                       ConnectionState.waiting
                                   ? Center(
                                       child: Column(
@@ -122,32 +116,149 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                   : ListView.builder(
                                       shrinkWrap: true,
                                       itemCount: snapshot.data!.length,
-                                      itemBuilder: ((context, index) {
+                                      itemBuilder: ((context1, index) {
                                         return Padding(
                                           padding:
                                               const EdgeInsets.only(bottom: 10),
-                                          child: ListTile(
+                                          child: SwipeActionCell(
+                                           backgroundColor: Colors.white,
                                             key: ValueKey<int>(
                                                 snapshot.data![index].id),
-                                            leading: Icon(
-                                              FluentIcons.clock_24_filled,
-                                              color: Theme.of(context)
-                                                  .primaryColorLight,
-                                            ),
-                                            title: Text(
-                                              snapshot.data![index].title,
-                                              style: TextStyle(
+                                            trailingActions: [
+                                              SwipeAction(
+                                                  widthSpace: size.width * 0.3,
+                                                  color: Colors.white,
+                                                  backgroundRadius: 10,
+                                                  content: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: const [
+                                                        Icon(
+                                                          FluentIcons
+                                                              .delete_32_regular,
+                                                          color: Colors.red,
+                                                        ),
+                                                        Text(
+                                                          "Delete",
+                                                          style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        )
+                                                      ]),
+                                                  onTap: (tap) {
+                                                    Alert(
+                                                        useRootNavigator: false,
+                                                        context: context1,
+                                                        title: "Alert",
+                                                        desc:
+                                                            "Do you want to delete this note?",
+                                                        style: AlertStyle(
+                                                            backgroundColor:
+                                                                Theme.of(context)
+                                                                    .primaryColor,
+                                                            alertAlignment: Alignment
+                                                                .center,
+                                                            alertBorder: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                        20)),
+                                                            descStyle: TextStyle(
+                                                                color: Theme.of(context)
+                                                                    .primaryColorLight,
+                                                                fontSize: 16,
+                                                                fontWeight: FontWeight
+                                                                    .bold),
+                                                            titleStyle: TextStyle(
+                                                                color: Theme.of(context)
+                                                                    .primaryColorLight,
+                                                                fontSize: 24,
+                                                                fontWeight: FontWeight
+                                                                    .w300)),
+                                                        padding: const EdgeInsets.symmetric(
+                                                            horizontal: 0,
+                                                            vertical: 10),
+                                                        buttons: [
+                                                          DialogButton(
+                                                              color:
+                                                                  Colors.black,
+                                                              child: Text(
+                                                                  "Dismiss",
+                                                                  style: TextStyle(
+                                                                      color: Theme.of(
+                                                                              context)
+                                                                          .primaryColorLight,
+                                                                      fontSize:
+                                                                          16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400)),
+                                                              onPressed: () {
+                                                                setState(() {});
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              }),
+                                                          DialogButton(
+                                                              color:
+                                                                  Colors.black,
+                                                              child: Text(
+                                                                  "Confrim",
+                                                                  style: TextStyle(
+                                                                      color: Theme.of(
+                                                                              context)
+                                                                          .primaryColorLight,
+                                                                      fontSize:
+                                                                          16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400)),
+                                                              onPressed: () {
+                                                                handler.deleteData(
+                                                                    snapshot
+                                                                        .data![
+                                                                            index]
+                                                                        .id);
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                                setState(() {});
+                                                              })
+                                                        ]).show();
+                                                  })
+                                            ],
+                                            child: Card(
+                                              color: Colors.black,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20)),
+                                              child: ListTile(
+                                                leading: Icon(
+                                                  FluentIcons.clock_24_filled,
                                                   color: Theme.of(context)
                                                       .primaryColorLight,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            subtitle: Text(
-                                              snapshot.data![index].timer,
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorLight,
-                                                  fontSize: 16),
+                                                ),
+                                                title: Text(
+                                                  snapshot.data![index].title,
+                                                  style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .primaryColorLight,
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                subtitle: Text(
+                                                  snapshot.data![index].timer,
+                                                  style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .primaryColorLight,
+                                                      fontSize: 16),
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         );
