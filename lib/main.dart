@@ -65,8 +65,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
+
   TextEditingController tcontroller = TextEditingController();
   TextEditingController tcontroller1 = TextEditingController();
+
   bool isCounting = false;
 
   var key = GlobalKey<FormState>();
@@ -181,6 +183,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: AdvancedDrawer(
@@ -268,6 +271,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
+
+    
             ),
           ),
           child: Scaffold(
