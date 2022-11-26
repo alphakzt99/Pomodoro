@@ -5,18 +5,26 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:intl/intl.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
+import 'package:pomodoro/timerCount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -29,14 +37,17 @@ class MyApp extends StatelessWidget {
           primaryColorDark: Colors.white),
       home: MyHomePage(
         timer: Timer(),
+        context1: context,
       ),
+      routes: {"/TimePage": (context) => newPage()},
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   final Timer timer;
-  const MyHomePage({super.key, required this.timer});
+  final BuildContext context1;
+  const MyHomePage({super.key, required this.timer, required this.context1});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -44,7 +55,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Timer timer1 = Timer();
-  late final AdvancedDrawerController _advancedDrawerController;
+  late AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
   DatabaseHandler databaseHandler = DatabaseHandler();
   String get countText {
@@ -55,83 +66,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
 
-  bool isCounting = false;
-  notify() {
-    if (controller.isDismissed) {
-      Alert(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              buttons: [
-                DialogButton(
-                    radius: BorderRadius.circular(20),
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      "Dismiss",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColorLight,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                    }),
-                DialogButton(
-                    radius: BorderRadius.circular(20),
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      "Save",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColorLight,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      Timer time = Timer.withID(int.parse(tcontroller1.text),
-                          tcontroller.text, countText);
-                      await databaseHandler.insertData(time);
-                      setState(() {});
-                      Navigator.of(context).pop();
-                    })
-              ],
-              context: context,
-              style: AlertStyle(
-                  descStyle: TextStyle(
-                    color: Theme.of(context).primaryColorLight,
-                    fontSize: 16,
-                  ),
-                  titleStyle: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  alertAlignment: Alignment.topCenter,
-                  alertBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-              title: "Alert",
-              desc: "Pomodoro timer is up.Rest and continue later.")
-          .show();
-    }
-  }
-
-  var key = GlobalKey<FormState>();
   TextEditingController tcontroller = TextEditingController();
   TextEditingController tcontroller1 = TextEditingController();
+
+  bool isCounting = false;
+
+  var key = GlobalKey<FormState>();
+  bool looping = true;
   double progress = 1.0;
   @override
   void initState() {
     super.initState();
 
-    databaseHandler.initDatabase();
-    databaseHandler.initDatabase().whenComplete(() {
-      databaseHandler.insertData(timer1);
-      setState(() {});
-    });
     _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 60));
-    timer1.title = tcontroller.text;
-    timer1.timer = countText;
+
     controller.addListener(() {
-      notify();
       if (controller.isAnimating) {
         setState(() {
           progress = controller.value;
@@ -142,6 +93,72 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           isCounting = false;
         });
       }
+      if (controller.isDismissed) {
+        FlutterRingtonePlayer.play(
+            android: AndroidSounds.notification,
+            ios: IosSounds.glass,
+            volume: 0.1,
+            looping: looping);
+      }
+      if (controller.isDismissed) {
+        Alert(
+                context: context,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                buttons: [
+                  DialogButton(
+                      radius: BorderRadius.circular(20),
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        "Dismiss",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).primaryColorLight,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                      }),
+                  DialogButton(
+                      radius: BorderRadius.circular(20),
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        "Save",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).primaryColorLight,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        looping = false;
+                        FlutterRingtonePlayer.stop();
+                        Timer time = Timer.withID(
+                            int.parse(tcontroller1.text),
+                            tcontroller.text,
+                            countText,
+                            DateFormat.yMMMEd().format(DateTime.now()));
+                        await databaseHandler.insertData(time);
+                        setState(() {});
+                        Navigator.of(context).pop();
+                      })
+                ],
+                style: AlertStyle(
+                    descStyle: TextStyle(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 16,
+                    ),
+                    titleStyle: TextStyle(
+                        color: Theme.of(context).primaryColorLight,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    alertAlignment: Alignment.topCenter,
+                    alertBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
+                title: "Alert",
+                desc: "Pomodoro timer is up.Rest and continue later.")
+            .show();
+      }
     });
 
     // TODO: implement initState
@@ -149,6 +166,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    tcontroller.dispose();
+    tcontroller1.dispose();
     _advancedDrawerController.dispose();
     controller.dispose();
     // TODO: implement dispose
@@ -164,80 +183,99 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: AdvancedDrawer(
-        childDecoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        controller: _advancedDrawerController,
-        backdropColor: Theme.of(context).primaryColorDark,
-        drawer: Container(
-          margin: EdgeInsets.all(20),
-          padding: EdgeInsets.all(20),
-          child: ListTileTheme(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            style: ListTileStyle.drawer,
-            tileColor: Theme.of(context).primaryColorDark,
-            iconColor: Theme.of(context).primaryColor,
-            textColor: Theme.of(context).primaryColor,
-            contentPadding:
-                const EdgeInsets.only(top: 20, bottom: 20, right: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).primaryColorLight),
-                      image: const DecorationImage(
-                          image: AssetImage("lib/photos/KZT.jpg")),
-                      borderRadius: BorderRadius.circular(20)),
-                ),
-                RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                      text: "Kaung Zaw Thant\n\n",
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                      text: "Level 1",
-                      style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold))
-                ])),
-                ListTile(
-                  
-                  onTap: () {},
-                  leading: const Icon(FluentIcons.person_accounts_24_regular),
-                  title: const Text("My Account",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-                ),
-                ListTile(
-                  onTap: () {},
-                  leading: const Icon(FluentIcons.history_24_regular),
-                  title: const Text("Pomodoro List",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-                ),
-                ListTile(
-                  onTap: () {},
-                  leading: const Icon(FluentIcons.settings_24_regular),
-                  title: const Text("Settings",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-                ),
-                ListTile(
-                  onTap: () {},
-                  leading: const Icon(FluentIcons.contact_card_24_regular),
-                  title: const Text("Contact Us",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-                ),
-              ],
+
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: AdvancedDrawer(
+          childDecoration:
+              BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          controller: _advancedDrawerController,
+          backdropColor: Theme.of(context).primaryColorDark,
+          drawer: Container(
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
+            width: size.width * 0.6,
+            height: size.height * 0.9,
+            child: ListTileTheme(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              style: ListTileStyle.drawer,
+              tileColor: Theme.of(context).primaryColorDark,
+              iconColor: Theme.of(context).primaryColor,
+              textColor: Theme.of(context).primaryColor,
+              contentPadding:
+                  const EdgeInsets.only(top: 20, bottom: 20, right: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Theme.of(context).primaryColorLight),
+                        image: const DecorationImage(
+                            image: AssetImage("lib/photos/KZT.jpg")),
+                        borderRadius: BorderRadius.circular(20)),
+                  ),
+                  RichText(
+                      text: TextSpan(children: [
+                    TextSpan(
+                        text: "Kaung Zaw Thant\n\n",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                    const TextSpan(
+                        text: "Level 1",
+                        style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold))
+                  ])),
+                  ListTile(
+                    onTap: () {},
+                    leading: const Icon(FluentIcons.person_accounts_24_regular),
+                    title: const Text(
+                      "My Account",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      _advancedDrawerController.hideDrawer();
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: ((context) => TimeCount())));
+                    },
+                    leading: const Icon(FluentIcons.history_24_regular),
+                    title: const Text("Pomodoro List",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                  ListTile(
+                    onTap: () {},
+                    leading: const Icon(FluentIcons.settings_24_regular),
+                    title: const Text("Settings",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                  ListTile(
+                    onTap: () {},
+                    leading: const Icon(FluentIcons.contact_card_24_regular),
+                    title: const Text("Contact Us",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+
+    
             ),
           ),
-        ),
-        child: Scaffold(
+          child: Scaffold(
             appBar: AppBar(
               elevation: 0,
               leading: IconButton(
@@ -251,7 +289,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           value.visible
                               ? Icons.clear
                               : FluentIcons.person_accounts_24_regular,
-                          color: Color(0xFF7AE582),
+                          color: const Color(0xFF7AE582),
                           key: ValueKey<bool>(value.visible),
                         ),
                       );
@@ -261,8 +299,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               actions: [
                 IconButton(
                     onPressed: () {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (ctx) => newPage()));
+                      Navigator.of(context).pushNamed(
+                        "/TimePage",
+                      );
                     },
                     icon: Icon(
                       FluentIcons.list_24_regular,
@@ -318,7 +357,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 20,
                                                       vertical: 10),
-                                              padding: EdgeInsets.all(10),
+                                              padding: const EdgeInsets.all(10),
                                               child: Column(
                                                 children: [
                                                   TextFormField(
@@ -442,9 +481,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                       return null;
                                                     },
                                                     onFieldSubmitted: ((value) {
-                                                      tcontroller.text = value;
-                                                      timer1.title =
-                                                          tcontroller.text;
+                                                      tcontroller.text;
                                                     }),
                                                   ),
                                                 ],
@@ -465,7 +502,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             onTimerDurationChanged: (value) {
                                               setState(() {
                                                 controller.duration = value;
-                                                timer1.timer = countText;
                                               });
                                             },
                                           ),
@@ -483,13 +519,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   .validate()) {
                                                 return;
                                               }
-
-                                              Timer time = Timer.withID(
-                                                  int.parse(tcontroller1.text),
-                                                  tcontroller.text,
-                                                  countText);
-                                              await databaseHandler
-                                                  .insertData(time);
 
                                               Navigator.pop(context);
                                             },
@@ -561,7 +590,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold),
                           )),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 MaterialButton(
@@ -594,12 +623,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         fontWeight: FontWeight.bold),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 )
               ]),
-            )),
-      ),
-    );
+            ),
+          ),
+        ));
   }
 }
