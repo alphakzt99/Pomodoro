@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
+import 'package:pomodoro/timerCount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
@@ -38,6 +39,7 @@ class _MyAppState extends State<MyApp> {
         timer: Timer(),
         context1: context,
       ),
+      routes: {"/TimePage": (context) => newPage()},
     );
   }
 }
@@ -74,10 +76,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    databaseHandler.initDatabase();
-    databaseHandler.initDatabase().whenComplete(() {
-      databaseHandler.insertData(timer1);
-    });
     _advancedDrawerController = AdvancedDrawerController();
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 60));
@@ -93,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           isCounting = false;
         });
       }
-      if (controller.isCompleted) {
+      if (controller.isDismissed) {
         FlutterRingtonePlayer.play(
             android: AndroidSounds.notification,
             ios: IosSounds.glass,
@@ -244,7 +242,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                   ),
                   ListTile(
-                    onTap: () {},
+                    onTap: () {
+                      _advancedDrawerController.hideDrawer();
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: ((context) => TimeCount())));
+                    },
                     leading: const Icon(FluentIcons.history_24_regular),
                     title: const Text("Pomodoro List",
                         style: TextStyle(
@@ -292,8 +294,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               actions: [
                 IconButton(
                     onPressed: () {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (ctx) => newPage()));
+                      Navigator.of(context).pushNamed(
+                        "/TimePage",
+                      );
                     },
                     icon: Icon(
                       FluentIcons.list_24_regular,
