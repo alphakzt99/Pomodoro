@@ -136,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             int.parse(tcontroller1.text),
                             tcontroller.text,
                             countText,
-                            DateFormat.yMMMEd().format(DateTime.now()));
+                            DateTime.now().toString());
                         await databaseHandler.insertData(time);
                         setState(() {});
                         Navigator.of(context).pop();

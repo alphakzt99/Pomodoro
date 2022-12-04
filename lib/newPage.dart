@@ -1,5 +1,6 @@
 
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
+import 'package:intl/intl.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -213,7 +214,7 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                                               color:
                                                                   Colors.black,
                                                               child: Text(
-                                                                  "Confrim",
+                                                                  "Confirm",
                                                                   style: TextStyle(
                                                                       color: Theme.of(
                                                                               context)
@@ -246,10 +247,11 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                               child: ListTile(
 
                                                 trailing: Padding(
-                                                  padding: const EdgeInsets.only(right: 20),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 20),
                                                   child: Text(
-                                                    snapshot
-                                                        .data![index].timer,
+                                                    snapshot.data![index].timer,
                                                     style: TextStyle(
                                                         color: Theme.of(context)
                                                             .primaryColorLight,
@@ -274,13 +276,13 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                                           FontWeight.bold),
                                                 ),
                                                 subtitle: Text(
-
-                                                  snapshot.data![index].datetime,
+                                                  DateFormat.yMMMEd().format(DateTime.parse(snapshot
+                                                      .data![index].datetime)),
                                                   style: TextStyle(
                                                       color: Theme.of(context)
                                                           .primaryColorDark,
-                                                          fontWeight: FontWeight.bold,
-
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontSize: 16),
                                                 ),
                                               ),

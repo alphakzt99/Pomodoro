@@ -14,8 +14,6 @@ class DatabaseHandler {
 
   String COLUMN_DATETIME = 'dateTime';
 
-
-
   late DatabaseHandler handler;
 
   late Database _database;
@@ -24,11 +22,8 @@ class DatabaseHandler {
     var path = await getDatabasesPath();
     _database = await openDatabase(join(path, DBNAME), version: 1,
         onCreate: ((db, version) async {
-      String sql =
-
-          'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL,$COLUMN_DATETIME TEXT NOT NULL)';
-
-      await db.execute(sql);
+      await db.execute(
+          'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER,$COLUMN_TITLE TEXT PRIMARY KEY NOT NULL,$COLUMN_TIMER TEXT NOT NULL,$COLUMN_DATETIME TEXT NOT NULL)');
     }));
     return _database;
   }
