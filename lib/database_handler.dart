@@ -11,7 +11,6 @@ class DatabaseHandler {
   String COLUMN_ID = 'id';
   String COLUMN_TITLE = 'title';
   String COLUMN_TIMER = 'timer';
-
   String COLUMN_DATETIME = 'dateTime';
 
   late DatabaseHandler handler;

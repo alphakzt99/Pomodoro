@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
-
   TextEditingController tcontroller = TextEditingController();
   TextEditingController tcontroller1 = TextEditingController();
 
@@ -164,8 +163,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     // TODO: implement initState
   }
 
+  final focusNode = FocusNode();
+  final nextFocus = FocusNode();
   @override
   void dispose() {
+    focusNode.dispose();
+    nextFocus.dispose();
     tcontroller.dispose();
     tcontroller1.dispose();
     _advancedDrawerController.dispose();
@@ -180,6 +183,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool changed1 = false;
   bool changed = false;
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -271,8 +275,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-
-    
             ),
           ),
           child: Scaffold(
@@ -365,7 +367,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                       setState(() {
                                                         changed1 = true;
                                                       });
+                                                      FocusScope.of(context)
+                                                          .requestFocus(
+                                                              focusNode);
                                                     },
+                                                    textInputAction:
+                                                        TextInputAction.next,
                                                     style: TextStyle(
                                                         color: Theme.of(context)
                                                             .primaryColor,
@@ -425,10 +432,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                   ),
                                                   TextFormField(
                                                     onTap: () {
+                                                      FocusScope.of(context)
+                                                          .requestFocus(
+                                                              nextFocus);
                                                       setState(() {
                                                         changed = true;
                                                       });
                                                     },
+                                                    textInputAction:
+                                                        TextInputAction.done,
                                                     style: TextStyle(
                                                         color: Theme.of(context)
                                                             .primaryColor,
