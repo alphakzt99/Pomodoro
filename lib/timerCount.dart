@@ -101,7 +101,7 @@ class _TimeCountState extends State<TimeCount> {
             ),
           ),
           Center(
-            child: Container(
+            child: SizedBox(
               width: size.width*0.8,
               height: size.height * 0.8,
               child: ListView.builder(
@@ -131,7 +131,7 @@ class _TimeCountState extends State<TimeCount> {
                 margin: const EdgeInsets.all(10),
                 child: GridView.builder(
                   reverse: false,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                     itemCount: 28,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 10,

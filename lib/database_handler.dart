@@ -1,8 +1,6 @@
 import 'dart:core';
-import 'dart:io';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 import 'timer.dart';
 
 class DatabaseHandler {
@@ -14,8 +12,6 @@ class DatabaseHandler {
 
   String COLUMN_DATETIME = 'dateTime';
 
-
-
   late DatabaseHandler handler;
 
   late Database _database;
@@ -25,7 +21,6 @@ class DatabaseHandler {
     _database = await openDatabase(join(path, DBNAME), version: 1,
         onCreate: ((db, version) async {
       String sql =
-
           'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL,$COLUMN_DATETIME TEXT NOT NULL)';
 
       await db.execute(sql);

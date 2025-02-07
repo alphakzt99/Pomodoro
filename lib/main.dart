@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:ffi';
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,13 +30,13 @@ class _MyAppState extends State<MyApp> {
       title: 'Pomodoro',
       theme: ThemeData(
           primaryColor: Colors.black,
-          primaryColorLight: Color(0xFF7AE582),
+          primaryColorLight: const Color(0xFF7AE582),
           primaryColorDark: Colors.white),
       home: MyHomePage(
         timer: Timer(),
         context1: context,
       ),
-      routes: {"/TimePage": (context) => newPage()},
+      routes: {"/TimePage": (context) => const newPage()},
     );
   }
 }
@@ -64,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ? '${(controller.duration!.inHours % 60).toString().padLeft(2, '0')}:${(controller.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
-
 
   TextEditingController tcontroller = TextEditingController();
   TextEditingController tcontroller1 = TextEditingController();
@@ -94,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         });
       }
       if (controller.isDismissed) {
-        FlutterRingtonePlayer.play(
+        FlutterRingtonePlayer().play(
             android: AndroidSounds.notification,
             ios: IosSounds.glass,
             volume: 0.1,
@@ -131,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                       onPressed: () async {
                         looping = false;
-                        FlutterRingtonePlayer.stop();
+                        FlutterRingtonePlayer().stop();
                         Timer time = Timer.withID(
                             int.parse(tcontroller1.text),
                             tcontroller.text,
@@ -248,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     onTap: () {
                       _advancedDrawerController.hideDrawer();
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: ((context) => TimeCount())));
+                          builder: ((context) => const TimeCount())));
                     },
                     leading: const Icon(FluentIcons.history_24_regular),
                     title: const Text("Pomodoro List",
@@ -271,8 +267,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-
-    
             ),
           ),
           child: Scaffold(

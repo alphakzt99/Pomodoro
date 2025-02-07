@@ -136,11 +136,11 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                                   widthSpace: size.width * 0.3,
                                                   color: Colors.white,
                                                   backgroundRadius: 10,
-                                                  content: Row(
+                                                  content: const Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .spaceEvenly,
-                                                      children: const [
+                                                      children: [
                                                         Icon(
                                                           FluentIcons
                                                               .delete_32_regular,
@@ -289,13 +289,13 @@ class _newPageState extends State<newPage> with TickerProviderStateMixin {
                                         );
                                       })),
                             )
-                          : Container(
+                          : SizedBox(
                               width: size.width * 0.8,
                               height: size.height * 0.7,
-                              child: Column(
+                              child: const Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Image(
                                       width: 200,
                                       height: 200,
