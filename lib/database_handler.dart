@@ -2,6 +2,8 @@ import 'dart:core';
 import 'package:path/path.dart' show join;
 import 'package:sqflite/sqflite.dart';
 import 'timer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseHandler {
   String DBNAME = 'Pomo.db';
@@ -54,5 +56,75 @@ class DatabaseHandler {
 
     List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
     return alltimer;
+  }
+}
+
+class FirestoreDatabaseHandler {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Get current user
+  User? get currentUser => _auth.currentUser;
+
+  // Save pomodoro session
+  Future<void> saveSession({
+    required int duration,
+    required String type,
+    required bool completed,
+  }) async {
+    if (currentUser == null) return;
+
+    await _firestore
+        .collection('users')
+        .doc(currentUser!.uid)
+        .collection('sessions')
+        .add({
+      'duration': duration,
+      'type': type,
+      'completed': completed,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Get user statistics
+  Future<Map<String, dynamic>> getUserStats() async {
+    if (currentUser == null) {
+      return {};
+    }
+
+    final userDoc =
+        await _firestore.collection('users').doc(currentUser!.uid).get();
+
+    return userDoc.data() ?? {};
+  }
+
+  // Update user settings
+  Future<void> updateSettings({
+    required int workDuration,
+    required int breakDuration,
+    required int longBreakDuration,
+    required int sessionsBeforeLongBreak,
+  }) async {
+    if (currentUser == null) return;
+
+    await _firestore.collection('users').doc(currentUser!.uid).set({
+      'settings': {
+        'workDuration': workDuration,
+        'breakDuration': breakDuration,
+        'longBreakDuration': longBreakDuration,
+        'sessionsBeforeLongBreak': sessionsBeforeLongBreak,
+      }
+    }, SetOptions(merge: true));
+  }
+
+  // Get user settings
+  Future<Map<String, dynamic>> getSettings() async {
+    if (currentUser == null) {
+      return {};
+    }
+
+    final userDoc =
+        await _firestore.collection('users').doc(currentUser!.uid).get();
+
+    return (userDoc.data()?['settings'] as Map<String, dynamic>?) ?? {};
   }
 }
