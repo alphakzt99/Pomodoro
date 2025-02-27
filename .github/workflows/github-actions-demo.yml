@@ -48,13 +48,4 @@ jobs:
 
       # Build the APK
       - name: Build
-        run: flutter build apk --release # Changed to --release for a release APK
-
-      # Upload the APK
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk # Updated path for --release
-
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+        run: flutter build apk 
