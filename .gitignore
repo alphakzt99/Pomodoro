@@ -34,6 +34,7 @@ coverage/
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Runner/GoogleService-Info.plist
 
 # Android specific
 **/android/**/gradle-wrapper.jar
@@ -48,6 +49,7 @@ coverage/
 **/android/app/debug
 **/android/app/profile
 **/android/app/release
+**/android/app/google-services.json
 
 # IDE specific
 .idea/
@@ -77,3 +79,5 @@ migrate_working_dir/
 .env.development.local
 .env.test.local
 .env.production.local
+
+**/macos/Runner/GoogleService-Info.plist
