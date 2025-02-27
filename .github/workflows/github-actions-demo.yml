@@ -9,36 +9,33 @@ jobs:
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
 
-      # Check out repository code
       - name: Check out repository code
         uses: actions/checkout@v4
 
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
 
-      # Set up Java (required for Android builds)
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # Set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0' # Adjust to your local Flutter version
+          flutter-version: '3.19.0' # Match your local version
           channel: 'stable'
           architecture: x64
 
-      # Verify Flutter installation
       - name: Check Flutter version
         run: flutter --version
 
-      # Get Flutter dependencies
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      # Restore Firebase config
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses
+
       - name: Restore Firebase config
         run: |
           echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
@@ -46,6 +43,13 @@ jobs:
 
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
-      # Build the APK
       - name: Build
-        run: flutter build apk 
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
