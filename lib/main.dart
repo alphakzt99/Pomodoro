@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,12 +6,19 @@ import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:intl/intl.dart';
 import 'package:pomodoro/database_handler.dart';
+import 'package:pomodoro/firebase_options.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:pomodoro/timerCount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+Future<void> main() async{
 
-void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await dotenv.load();
   runApp(const MyApp());
 }
 
