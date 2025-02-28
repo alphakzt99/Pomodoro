@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:postgres/postgres.dart';
 import 'timer.dart';
-import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
 class PostgresHandler {
   Connection? connection;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -10,8 +13,23 @@ class PostgresHandler {
   PostgresHandler(){
     _initializeConnection();
   }
+
+  Future<List<int>> _loadAsset(String path) async {
+    final byteData = await rootBundle.loadString(path);
+    return byteData.codeUnits;
+  }
   Future<void> _initializeConnection() async {
     await dotenv.load();
+    final serverCA = await _loadAsset('client/server-ca.pem');
+    final clientCert = await _loadAsset('client/client-cert.pem');
+    final clientKey = await _loadAsset('client/client-key.pem');
+
+    final securityContext = SecurityContext()
+      ..useCertificateChainBytes(clientCert)
+      ..usePrivateKeyBytes(clientKey)
+      ..setTrustedCertificatesBytes(serverCA);
+    
+
     connection = await Connection.open(
       Endpoint(
         database: dotenv.env['POSTGRES_HOST'] ?? 'postPomo',
@@ -21,6 +39,11 @@ class PostgresHandler {
       ),
       settings: ConnectionSettings(
         sslMode: SslMode.verifyFull,
+        securityContext: securityContext,
+        applicationName: 'Pomodoro',
+        timeZone: 'UTC',
+        connectTimeout: Duration(seconds: 30),
+        queryTimeout: Duration(seconds: 10)
       ),
     );
 

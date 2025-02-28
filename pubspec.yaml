@@ -64,6 +64,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - client/server-ca.pem
+    - client/client-cert.pem
+    - client/client-key.pem
     - lib/photos/KZT.jpg
     - lib/photos/error.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
