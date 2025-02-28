@@ -12,6 +12,7 @@ import 'package:pomodoro/timer.dart';
 import 'package:pomodoro/timerCount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'Postgres.dart';
 Future<void> main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Timer timer1 = Timer();
   late AdvancedDrawerController _advancedDrawerController;
   late AnimationController controller;
-  DatabaseHandler databaseHandler = DatabaseHandler();
+  PostgresHandler databaseHandler = PostgresHandler();
   String get countText {
     Duration count = controller.duration! * controller.value;
     return controller.isDismissed

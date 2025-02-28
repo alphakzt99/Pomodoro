@@ -5,7 +5,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
+import 'Postgres.dart';
 class newPage extends StatefulWidget {
   const newPage({super.key});
 
@@ -14,14 +14,14 @@ class newPage extends StatefulWidget {
 }
 
 class _newPageState extends State<newPage> with TickerProviderStateMixin {
-  late DatabaseHandler handler;
+  late PostgresHandler handler;
   ScrollController controller = ScrollController();
   Timer timer = Timer();
 
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
+    handler = PostgresHandler();
   }
 
   @override
