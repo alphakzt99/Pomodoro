@@ -15,8 +15,8 @@ class PostgresHandler {
   }
 
   Future<List<int>> _loadAsset(String path) async {
-    final byteData = await rootBundle.loadString(path);
-    return byteData.codeUnits;
+    final byteData = await rootBundle.load(path);
+    return byteData.buffer.asUint8List();
   }
   Future<void> _initializeConnection() async {
     await dotenv.load();
@@ -32,7 +32,8 @@ class PostgresHandler {
 
     connection = await Connection.open(
       Endpoint(
-        database: dotenv.env['POSTGRES_HOST'] ?? 'postPomo',
+        port: int.parse(dotenv.env['POSTGRES_PORT'] ?? '5432'),
+        database: dotenv.env['POSTGRES_DB'] ?? 'postPomo',
         host: dotenv.env['POSTGRES_HOST'] ?? 'localhost',
         username: dotenv.env['POSTGRES_USER'] ?? 'postgres',
         password: dotenv.env['POSTGRES_PASSWORD'] ?? 'postgres',

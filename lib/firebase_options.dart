@@ -5,19 +5,9 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
-/// 
-/// 
 class DefaultFirebaseOptions {
+  
+  static final env = dotenv.env;
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
@@ -51,9 +41,9 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
+  
   static FirebaseOptions android = FirebaseOptions(
-    apiKey: dotenv.env['Android_Firebase_API_KEY'] ?? '',
+    apiKey: dotenv.env['Android_Firebase_API_Key'] ?? '',
     appId: dotenv.env['Android_Firebase_App_ID'] ?? '',
     messagingSenderId: dotenv.env['Android_Firebase_Messaging_Sender_ID'] ?? '',
     projectId: dotenv.env['Android_Firebase_Project_ID'] ?? '',

@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kaungzawthant.pomodoro">
+    <uses-sdk android:minSdkVersion="24" />
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="pomodoro"
         android:name="${applicationName}"

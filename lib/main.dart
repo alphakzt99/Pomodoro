@@ -5,21 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:intl/intl.dart';
-import 'package:pomodoro/database_handler.dart';
-import 'package:pomodoro/firebase_options.dart';
 import 'package:pomodoro/newPage.dart';
 import 'package:pomodoro/timer.dart';
-import 'package:pomodoro/timerCount.dart';
+import 'package:pomodoro/timercount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'Postgres.dart';
-Future<void> main() async{
+import 'postgres.dart';
 
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await dotenv.load();
+
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

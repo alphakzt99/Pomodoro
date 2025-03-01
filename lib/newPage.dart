@@ -3,9 +3,8 @@ import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:pomodoro/database_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'Postgres.dart';
+import 'postgres.dart';
 class newPage extends StatefulWidget {
   const newPage({super.key});
 

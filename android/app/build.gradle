@@ -22,16 +22,16 @@ android {
     ndkVersion = "25.1.8937393"
     
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     defaultConfig {
         applicationId "com.kaungzawthant.pomodoro"
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -50,4 +50,13 @@ flutter {
     source '../..'
 }
 
+dependencies {
+    // Optional: Explicitly declare Firebase dependencies if needed
+    implementation('androidx.fragment:fragment:1.7.1') {
+        exclude group: 'androidx.customview', module: 'customview'
+    }
 
+    implementation platform('com.google.firebase:firebase-bom:33.1.0') // Use latest BOM
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-storage'
+}

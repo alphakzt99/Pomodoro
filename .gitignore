@@ -50,6 +50,8 @@ coverage/
 **/android/app/profile
 **/android/app/release
 **/android/app/google-services.json
+**/android/app/build/
+**/android/app/.cxx/
 
 # IDE specific
 .idea/
