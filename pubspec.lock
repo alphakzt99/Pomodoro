@@ -169,6 +169,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+<<<<<<< HEAD
   firebase_app_check:
     dependency: "direct main"
     description:
@@ -193,6 +194,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0+8"
+=======
+>>>>>>> b20ce55148d15fbba091965255df583b8fb777a4
   firebase_auth:
     dependency: "direct main"
     description:

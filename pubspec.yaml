@@ -71,7 +71,10 @@ flutter:
     - client/client-key.pem
     - lib/photos/KZT.jpg
     - lib/photos/error.jpg
+<<<<<<< HEAD
     - lib/photos/pomodoro_logo.png
+=======
+>>>>>>> b20ce55148d15fbba091965255df583b8fb777a4
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
   # For details regarding adding assets from package dependencies, see

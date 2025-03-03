@@ -2,6 +2,7 @@ C/C++ Structured Logp
 n
 l/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/additional_project_files.txtC
 A
+<<<<<<< HEAD
 ?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	¢Ñ«ÉÕ2 ±ÕëúÔ2m
 k
 i/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/android_gradle_build.json	£Ñ«ÉÕ2ô ´ÕëúÔ2r
@@ -26,3 +27,29 @@ i
 g/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/symbol_folder_index.txt	£Ñ«ÉÕ2^ ·ÕëúÔ2a
 _
 ]/Users/kaungzawthant/dev/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt	£Ñ«ÉÕ2¤ ýŠæèÔ2
+=======
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	äÃÝÿÔ2 ±ÕëúÔ2m
+k
+i/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/android_gradle_build.json	äÃÝÿÔ2ô ´ÕëúÔ2r
+p
+n/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/android_gradle_build_mini.json	äÃÝÿÔ2ï ¶ÕëúÔ2_
+]
+[/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/build.ninja	äÃÝÿÔ2ÄÒ ˜ÕëúÔ2c
+a
+_/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/build.ninja.txt	äÃÝÿÔ2h
+f
+d/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/build_file_index.txt	äÃÝÿÔ2] ¸ÕëúÔ2i
+g
+e/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/compile_commands.json	äÃÝÿÔ2m
+k
+i/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/compile_commands.json.bin	äÃÝÿÔ2	s
+q
+o/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/metadata_generation_command.txt	äÃÝÿÔ2
+Ý ·ÕëúÔ2f
+d
+b/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/prefab_config.json	äÃÝÿÔ2( ·ÕëúÔ2k
+i
+g/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/arm64-v8a/symbol_folder_index.txt	äÃÝÿÔ2^ ·ÕëúÔ2a
+_
+]/Users/kaungzawthant/dev/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt	äÃÝÿÔ2¤ ýŠæèÔ2
+>>>>>>> b20ce55148d15fbba091965255df583b8fb777a4
