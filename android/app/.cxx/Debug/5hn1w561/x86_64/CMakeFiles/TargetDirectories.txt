@@ -1,0 +1,2 @@
+/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/x86_64/CMakeFiles/edit_cache.dir
+/Users/kaungzawthant/Desktop/pomodoro/android/app/.cxx/Debug/5hn1w561/x86_64/CMakeFiles/rebuild_cache.dir

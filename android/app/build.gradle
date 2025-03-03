@@ -1,0 +1,62 @@
+plugins {
+    id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.newDataInputStream())
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
+def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0.0'
+android {
+    namespace = "com.kaungzawthant.pomodoro"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = "25.1.8937393"
+    
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    defaultConfig {
+        applicationId "com.kaungzawthant.pomodoro"
+        minSdk = 24
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+    }
+    buildTypes {
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // Optional: Explicitly declare Firebase dependencies if needed
+    implementation('androidx.fragment:fragment:1.7.1') {
+        exclude group: 'androidx.customview', module: 'customview'
+    }
+implementation 'com.google.firebase:firebase-appcheck-playintegrity:18.0.0'
+    implementation platform('com.google.firebase:firebase-bom:33.1.0') // Use latest BOM
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-storage'
+}
