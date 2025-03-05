@@ -1,32 +1,28 @@
 import 'package:intl/intl.dart';
 
 class Timer {
-  int id = 1;
-  String title = '';
-  String timer = '';
-  String datetime = DateFormat.yMMMEd().format(DateTime.now());
-  int get getId => id;
-
-  set setId(int id) => this.id = id;
-
-  String get getTitle => title;
-
-  set getTitle(String title) => this.title = title;
-
-  String get gettimer => timer;
-
-  set settimer(String timer) => this.timer = timer;
-
-  String getDateTime(String dateTime) => datetime = dateTime;
+  int id;
+  String title;
+  String timer;
+  String datetime;
   
-  Timer();
-  Timer.withID(this.id, this.title, this.timer, this.datetime);
-
-  Timer.fromMap(Map<String, dynamic> map) {
-    id = map['id'];
-    title = map['title'];
-    timer = map['timer'];
-    datetime = map['dateTime'];
+  Timer({this.id = 1, this.title = '', this.timer = '', this.datetime = ''}){
+    if(datetime.isEmpty){
+      datetime = DateFormat.yMMMEd().format(DateTime.now());
+    }
   }
-  Map<String, Object> toMap() => {'id': id, 'title': title, 'timer': timer,'dateTime': datetime};
+
+  Timer.withID({required this.id, this.title = '', this.timer = '', this.datetime = ''});
+
+  Timer.fromMap(Map<String, dynamic> map)
+      : id = map['id'] ?? 1,
+        title = map['title'] ?? '',
+        timer = map['timer'] ?? '',
+        datetime = map['dateTime'] ?? DateFormat.yMMMEd().format(DateTime.now());
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'timer': timer,
+        'dateTime': datetime,
+      };
 }
