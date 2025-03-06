@@ -22,12 +22,13 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core: ^3.12.1
+  firebase_database: ^11.3.4
   firebase_auth: ^5.5.1
+  firebase_app_check: ^0.3.2+4
   firebase_storage: ^12.4.4
   cloud_firestore: ^5.6.5
   google_sign_in: ^6.2.1
   flutter_dotenv: ^5.1.0
-  firebase_app_check: ^0.3.2+4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -71,10 +72,7 @@ flutter:
     - client/client-key.pem
     - lib/photos/KZT.jpg
     - lib/photos/error.jpg
-<<<<<<< HEAD
     - lib/photos/pomodoro_logo.png
-=======
->>>>>>> b20ce55148d15fbba091965255df583b8fb777a4
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
   # For details regarding adding assets from package dependencies, see

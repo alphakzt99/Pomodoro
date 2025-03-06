@@ -1,17 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:intl/intl.dart';
-import 'package:pomodoro/newPage.dart';
+import 'package:pomodoro/database_handler.dart';
+import 'package:pomodoro/timePage.dart';
 import 'package:pomodoro/timer.dart';
+import 'package:pomodoro/timerInputBottomSheet.dart';
 import 'package:pomodoro/timercount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'postgres.dart';
 import 'sign_in.dart';
 import 'sign_up.dart';
 import 'auth_service.dart';
@@ -61,6 +61,7 @@ class _MyAppState extends State<MyApp> {
                   timer: Timer(),
                   context1: context,
                 ),
+            '/timePage': (context) => timePage(),
           },
         );
       },
@@ -78,19 +79,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  Timer timer1 = Timer();
   late AdvancedDrawerController _advancedDrawerController;
-  late AnimationController controller;
-  PostgresHandler databaseHandler = PostgresHandler();
+  late AnimationController animationController;
+  DatabaseHandler databaseHandler = DatabaseHandler();
   String get countText {
-    Duration count = controller.duration! * controller.value;
-    return controller.isDismissed
-        ? '${(controller.duration!.inHours % 60).toString().padLeft(2, '0')}:${(controller.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(controller.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
+    Duration count = animationController.duration! * animationController.value;
+    return animationController.isDismissed
+        ? '${(animationController.duration!.inHours % 60).toString().padLeft(2, '0')}:${(animationController.duration!.inMinutes % 60).toString().padLeft(2, '0')}:${(animationController.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
         : '${(count.inHours % 60).toString().padLeft(2, '0')}:${(count.inMinutes % 60).toString().padLeft(2, '0')}:${(count.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
-  TextEditingController tcontroller = TextEditingController();
-  TextEditingController tcontroller1 = TextEditingController();
+  TextEditingController titleController = TextEditingController();
 
   bool isCounting = false;
 
@@ -102,13 +101,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
 
     _advancedDrawerController = AdvancedDrawerController();
-    controller =
+    animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 60));
 
-    controller.addListener(() {
-      if (controller.isAnimating) {
+    animationController.addListener(() {
+      if (animationController.isAnimating) {
         setState(() {
-          progress = controller.value;
+          progress = animationController.value;
         });
       } else {
         setState(() {
@@ -116,14 +115,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           isCounting = false;
         });
       }
-      if (controller.isDismissed) {
+      if (animationController.isDismissed) {
         FlutterRingtonePlayer().play(
             android: AndroidSounds.notification,
             ios: IosSounds.glass,
             volume: 0.1,
             looping: looping);
       }
-      if (controller.isDismissed) {
+      if (animationController.isDismissed) {
         Alert(
                 context: context,
                 padding:
@@ -155,12 +154,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       onPressed: () async {
                         looping = false;
                         FlutterRingtonePlayer().stop();
-                        Timer time = Timer.withID(
-                            int.parse(tcontroller1.text),
-                            tcontroller.text,
-                            countText,
-                            DateFormat.yMMMEd().format(DateTime.now()));
-                        await databaseHandler.insertData(time);
+                        Timer time = Timer(
+                            title: titleController.text,
+                            timer: countText,
+                            datetime:
+                                DateFormat.yMMMEd().format(DateTime.now()));
+                        await databaseHandler.addTimer(time);
                         setState(() {});
                         Navigator.of(context).pop();
                       })
@@ -189,10 +188,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    tcontroller.dispose();
-    tcontroller1.dispose();
+    titleController.dispose();
     _advancedDrawerController.dispose();
-    controller.dispose();
+    animationController.dispose();
     // TODO: implement dispose
     super.dispose();
   }
@@ -201,8 +199,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _advancedDrawerController.showDrawer();
   }
 
-  bool changed1 = false;
-  bool changed = false;
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -321,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 IconButton(
                     onPressed: () {
                       Navigator.of(context).pushNamed(
-                        "/TimePage",
+                        "/timePage",
                       );
                     },
                     icon: Icon(
@@ -352,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (controller.isDismissed) {
+                          if (animationController.isDismissed) {
                             showModalBottomSheet(
                                 isScrollControlled: true,
                                 backgroundColor:
@@ -363,205 +359,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         topLeft: Radius.circular(20),
                                         topRight: Radius.circular(20))),
                                 context: context,
-                                builder: (context) => SizedBox(
-                                      width: size.width,
-                                      height: size.height * 0.65,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Form(
-                                            key: key,
-                                            child: Container(
-                                              width: size.width,
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 10),
-                                              padding: const EdgeInsets.all(10),
-                                              child: Column(
-                                                children: [
-                                                  TextFormField(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        changed1 = true;
-                                                      });
-                                                    },
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                    decoration: changed1 == true
-                                                        ? InputDecoration(
-                                                            contentPadding:
-                                                                const EdgeInsets
-                                                                    .all(10),
-                                                            labelText: "ID",
-                                                            labelStyle: TextStyle(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor,
-                                                                fontSize: 20,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                            hintText:
-                                                                "ID Number",
-                                                            hintStyle: const TextStyle(
-                                                                color: Colors
-                                                                    .black54,
-                                                                fontSize: 16,
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          )
-                                                        : const InputDecoration(
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    10),
-                                                            hintText:
-                                                                "ID Number",
-                                                            hintStyle: TextStyle(
-                                                                color: Colors
-                                                                    .black54,
-                                                                fontSize: 16,
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
-                                                    controller: tcontroller1,
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    validator: (value) {
-                                                      if (value!.isEmpty) {
-                                                        return 'Enter the ID Number';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onFieldSubmitted:
-                                                        ((value) =>
-                                                            tcontroller1.text),
-                                                  ),
-                                                  TextFormField(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        changed = true;
-                                                      });
-                                                    },
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                    decoration: changed == true
-                                                        ? InputDecoration(
-                                                            contentPadding:
-                                                                const EdgeInsets
-                                                                    .all(10),
-                                                            labelText: "Title",
-                                                            labelStyle: TextStyle(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor,
-                                                                fontSize: 20,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                            hintText: "Title",
-                                                            hintStyle: const TextStyle(
-                                                                color: Colors
-                                                                    .black54,
-                                                                fontSize: 16,
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          )
-                                                        : const InputDecoration(
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    10),
-                                                            hintText: "Title",
-                                                            hintStyle: TextStyle(
-                                                                color: Colors
-                                                                    .black54,
-                                                                fontSize: 16,
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
-                                                    controller: tcontroller,
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    validator: (value) {
-                                                      if (value!.isEmpty) {
-                                                        return 'Enter the title';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onFieldSubmitted: ((value) {
-                                                      tcontroller.text;
-                                                    }),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            "Choose your timer",
-                                            style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          CupertinoTimerPicker(
-                                            initialTimerDuration:
-                                                controller.duration!,
-                                            onTimerDurationChanged: (value) {
-                                              setState(() {
-                                                controller.duration = value;
-                                              });
-                                            },
-                                          ),
-                                          MaterialButton(
-                                            height: 50,
-                                            minWidth: 300,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(30)),
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            onPressed: () async {
-                                              if (!key.currentState!
-                                                  .validate()) {
-                                                return;
-                                              }
-
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text(
-                                              "Confirm",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          )
-                                        ],
-                                      ),
+                                builder: (context) => TimerInputBottomSheet(
+                                      formKey: key,
+                                      titleController: titleController,
+                                      animationController: animationController,
+                                      onTimerDuration: (Duration duration) {
+                                        setState(() {
+                                          animationController.duration = duration;
+                                          progress = 1.0;
+                                        });
+                                      },
                                     ));
                           }
                         },
                         child: AnimatedBuilder(
-                          animation: controller,
+                          animation: animationController,
                           builder: (context, child) => Text(
                             countText,
                             style: TextStyle(
@@ -582,15 +394,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(20)),
                     color: Theme.of(context).primaryColorLight,
                     onPressed: () {
-                      if (controller.isAnimating) {
-                        controller.stop();
+                      if (animationController.isAnimating) {
+                        animationController.stop();
                         setState(() {
                           isCounting = false;
                         });
                       } else {
-                        controller.reverse(
-                            from:
-                                controller.value == 0 ? 1.0 : controller.value);
+                        animationController.reverse(
+                            from: animationController.value == 0
+                                ? 1.0
+                                : animationController.value);
                         setState(() {
                           isCounting = true;
                         });
@@ -624,13 +437,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(20)),
                   color: Theme.of(context).primaryColor,
                   onPressed: () {
-                    if (controller.isAnimating) {
-                      controller.reset();
+                    if (animationController.isAnimating) {
+                      animationController.reset();
                       setState(() {
                         isCounting = false;
                       });
                     } else {
-                      controller.reset();
+                      animationController.reset();
                       setState(() {
                         isCounting = false;
                       });
