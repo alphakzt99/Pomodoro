@@ -1,130 +1,161 @@
 import 'dart:core';
-import 'package:path/path.dart' show join;
-import 'package:sqflite/sqflite.dart';
 import 'timer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 
 class DatabaseHandler {
-  String DBNAME = 'Pomo.db';
-  String TABLE_NAME = 'Pomodoro';
-  String COLUMN_ID = 'id';
-  String COLUMN_TITLE = 'title';
-  String COLUMN_TIMER = 'timer';
-
-  String COLUMN_DATETIME = 'dateTime';
-
-  late DatabaseHandler handler;
-
-  late Database _database;
-
-  Future<Database> initDatabase() async {
-    var path = await getDatabasesPath();
-    _database = await openDatabase(join(path, DBNAME), version: 1,
-        onCreate: ((db, version) async {
-      String sql =
-          'CREATE TABLE $TABLE_NAME($COLUMN_ID INTEGER PRIMARY KEY,$COLUMN_TITLE TEXT NOT NULL,$COLUMN_TIMER TEXT NOT NULL,$COLUMN_DATETIME TEXT NOT NULL)';
-
-      await db.execute(sql);
-    }));
-    return _database;
-  }
-
-  Future<int> insertData(Timer timer) async {
-    await initDatabase();
-    return await _database.insert(TABLE_NAME, timer.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  Future<int> deleteData(int id) async {
-    await initDatabase();
-    return await _database.delete(TABLE_NAME, where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<int> updateData(Timer time) async {
-    await initDatabase();
-    return await _database.update(TABLE_NAME, time.toMap(),
-        where: 'id = ?', whereArgs: [time.id]);
-  }
-
-  Future<void> deleteDatabase(String path) =>
-      databaseFactory.deleteDatabase(path);
-
-  Future<List<Timer>> selectAllTimer() async {
-    await initDatabase();
-    var result = await _database.query(TABLE_NAME);
-
-    List<Timer> alltimer = result.map((e) => Timer.fromMap(e)).toList();
-    return alltimer;
-  }
-}
-
-class FirestoreDatabaseHandler {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // Get current user
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+
+  
   User? get currentUser => _auth.currentUser;
 
-  // Save pomodoro session
-  Future<void> saveSession({
-    required int duration,
-    required String type,
-    required bool completed,
-  }) async {
-    if (currentUser == null) return;
-
-    await _firestore
-        .collection('users')
-        .doc(currentUser!.uid)
-        .collection('sessions')
-        .add({
-      'duration': duration,
-      'type': type,
-      'completed': completed,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-  }
-
-  // Get user statistics
-  Future<Map<String, dynamic>> getUserStats() async {
-    if (currentUser == null) {
-      return {};
-    }
-
-    final userDoc =
-        await _firestore.collection('users').doc(currentUser!.uid).get();
-
-    return userDoc.data() ?? {};
-  }
-
-  // Update user settings
-  Future<void> updateSettings({
-    required int workDuration,
-    required int breakDuration,
-    required int longBreakDuration,
-    required int sessionsBeforeLongBreak,
-  }) async {
-    if (currentUser == null) return;
-
-    await _firestore.collection('users').doc(currentUser!.uid).set({
-      'settings': {
-        'workDuration': workDuration,
-        'breakDuration': breakDuration,
-        'longBreakDuration': longBreakDuration,
-        'sessionsBeforeLongBreak': sessionsBeforeLongBreak,
+  
+  Future<String?> signUp(String email, String password) async {
+    try {
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User? user = userCredential.user;
+      if (user != null) {
+        await _dbRef.child('users').child(user.uid).set({
+          'email': email,
+          'createdAt': ServerValue.timestamp,
+        });
+        return user.uid; 
       }
-    }, SetOptions(merge: true));
+      return null;
+    } on FirebaseAuthException catch (e) {
+      print("Sign-up error: $e");
+      return null;
+    } catch (e) {
+      print("Sign-up error: $e");
+      return null;
+    }
   }
 
-  // Get user settings
-  Future<Map<String, dynamic>> getSettings() async {
-    if (currentUser == null) {
-      return {};
+  Future<String?> signIn(String email, String password) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential.user?.uid;
+    } catch (e) {
+      print("Sign-in error: $e");
+      return null;
     }
+  }
 
-    final userDoc =
-        await _firestore.collection('users').doc(currentUser!.uid).get();
+  
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
 
-    return (userDoc.data()?['settings'] as Map<String, dynamic>?) ?? {};
+  Future<String?> addTimer(Timer timer) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        DatabaseReference databaseReference = _dbRef
+        .child('users')
+        .child(user.uid)
+        .child('timers')
+        .push();
+
+        await databaseReference.set(timer.toMap());
+
+        return databaseReference.key;
+      } catch (e) {
+        print("Error adding timer: $e");
+      }
+    } else {
+      throw Exception("User not authenticated");
+    }
+    return null;
+  }
+
+  Future<List<MapEntry<String, Timer>>> getTimers() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        final snapshot =
+            await _dbRef.child('users').child(user.uid).child('timers').get();
+        if (snapshot.exists) {
+          Map<dynamic, dynamic> timersMap =
+              snapshot.value as Map<dynamic, dynamic>;
+          return timersMap.entries
+              .map((entry) => MapEntry(entry.key as String, Timer.fromMap(Map<String, dynamic>.from(entry.value))))
+              .toList();
+        }
+        return [];
+      } catch (e) {
+        print("Error fetching timers: $e");
+        return [];
+      }
+    } else {
+      throw Exception("User not authenticated");
+    }
+  }
+
+  Future<void> updateTimer(String timerKey, Timer updatedTimer) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _dbRef
+            .child('users')
+            .child(user.uid)
+            .child('timers')
+            .child(timerKey)
+            .update(updatedTimer.toMap());
+      } catch (e) {
+        print("Error updating timer: $e");
+      }
+    } else {
+      throw Exception("User not authenticated");
+    }
+  }
+
+  Future<void> deleteTimer(String timerKey) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _dbRef
+            .child('users')
+            .child(user.uid)
+            .child('timers')
+            .child(timerKey)
+            .remove();
+      } catch (e) {
+        print("Error deleting timer: $e");
+      }
+    } else {
+      throw Exception("User not authenticated");
+    }
+  }
+
+  Stream<List<MapEntry<String, Timer>>> listenToTimers() {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      return _dbRef
+          .child('users')
+          .child(user.uid)
+          .child('timers')
+          .onValue
+          .map((event) {
+        final data = event.snapshot.value;
+        if (data != null && data is Map) {
+          return data.entries
+              .map((entry) => MapEntry(entry.key as String, Timer.fromMap(Map<String, dynamic>.from(entry.value))))
+              .toList();
+        }
+        return [];
+      });
+    } else {
+      throw Exception("User not authenticated");
+    }
   }
 }
+
+
