@@ -1,9 +1,12 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro/database_handler.dart';
 import 'auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -13,6 +16,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final AuthService _auth = AuthService();
+  final DatabaseHandler _dbHandler = DatabaseHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -105,20 +109,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 await FirebaseAppCheck.instance.getToken();
                             print('App Check Token: $appCheckToken');
 
-                            UserCredential userCredential =
-                                await _auth.registerWithEmailPassword(
+                            String? uid = await _dbHandler.signUp(
                               _emailController.text.trim(),
                               _passwordController.text,
                             );
 
-                            if (userCredential.user != null) {
-                              await _auth.signInWithEmailPassword(
-                                _emailController.text.trim(),
-                                _passwordController.text,
-                              );
-                              Navigator.pushReplacementNamed(context, '/signin');
-                            }
-                          } on FirebaseAuthException catch (e) {
+                            await _dbHandler.signIn(
+                              _emailController.text.trim(),
+                              _passwordController.text,
+                            );
+                            Navigator.pushReplacementNamed(context, '/signin');
+                                                    } on FirebaseAuthException catch (e) {
                             String errorMessage = 'An error occurred';
                             switch (e.code) {
                               case 'email-already-in-use':

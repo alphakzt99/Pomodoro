@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro/database_handler.dart';
 import 'auth_service.dart';
 class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
@@ -11,13 +14,11 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final AuthService _auth = AuthService();
+  final DatabaseHandler _dbHandler = DatabaseHandler();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sign In'),
-      ),
       body: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
@@ -35,8 +36,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Column(
                   children: [
                     TextFormField(
-                      style:
-                          TextStyle(color: Theme.of(context).primaryColorLight),
                       controller: _emailController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(8),
@@ -104,16 +103,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           try {
-                            UserCredential userCredential =
-                                await _auth.registerWithEmailPassword(
+                            UserCredential userCredential = await _auth.signInWithEmailPassword(
                               _emailController.text.trim(),
                               _passwordController.text,
                             );
                             if (userCredential.user != null) {
-                              await _auth.signInWithEmailPassword(
-                                _emailController.text.trim(),
-                                _passwordController.text,
-                              );
                               Navigator.pushReplacementNamed(context, '/home');
                             }
                           } catch (e) {
