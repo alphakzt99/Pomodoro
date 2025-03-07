@@ -103,13 +103,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           try {
-                            UserCredential userCredential = await _auth.signInWithEmailPassword(
+                            String? uid = await _dbHandler.signIn(
                               _emailController.text.trim(),
                               _passwordController.text,
                             );
-                            if (userCredential.user != null) {
-                              Navigator.pushReplacementNamed(context, '/home');
-                            }
+                            if (_auth.currentUser != null && uid != null) {
+                              Navigator.pushReplacementNamed(
+                                  context, '/home');
+                            } 
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Error: ${e.toString()}')),

@@ -114,12 +114,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               _passwordController.text,
                             );
 
-                            await _dbHandler.signIn(
-                              _emailController.text.trim(),
-                              _passwordController.text,
-                            );
-                            Navigator.pushReplacementNamed(context, '/signin');
-                                                    } on FirebaseAuthException catch (e) {
+                            if (_auth.currentUser != null && uid != null) {
+                              Navigator.pushReplacementNamed(
+                                  context, '/signin');
+                            }
+                          } on FirebaseAuthException catch (e) {
                             String errorMessage = 'An error occurred';
                             switch (e.code) {
                               case 'email-already-in-use':
