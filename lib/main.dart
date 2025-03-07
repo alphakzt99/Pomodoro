@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:intl/intl.dart';
+import 'package:pomodoro/Drawer.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'package:pomodoro/timePage.dart';
 import 'package:pomodoro/timer.dart';
 import 'package:pomodoro/timerInputBottomSheet.dart';
-import 'package:pomodoro/timercount.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'sign_in.dart';
@@ -102,9 +102,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     _advancedDrawerController = AdvancedDrawerController();
     animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 60));
-
-    animationController.addListener(() {
+        AnimationController(vsync: this, duration: const Duration(seconds: 60))
+..addListener(() {
       if (animationController.isAnimating) {
         setState(() {
           progress = animationController.value;
@@ -119,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         FlutterRingtonePlayer().play(
             android: AndroidSounds.notification,
             ios: IosSounds.glass,
-            volume: 0.1,
+            volume: 1.0,
             looping: looping);
       }
       if (animationController.isDismissed) {
@@ -139,6 +138,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             fontWeight: FontWeight.bold),
                       ),
                       onPressed: () async {
+                        looping = false;
+                        FlutterRingtonePlayer().stop();
                         Navigator.of(context).pop();
                       }),
                   DialogButton(
@@ -210,88 +211,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               BoxDecoration(borderRadius: BorderRadius.circular(20)),
           controller: _advancedDrawerController,
           backdropColor: Theme.of(context).primaryColorDark,
-          drawer: Container(
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(20),
-            width: size.width * 0.6,
-            height: size.height * 0.9,
-            child: ListTileTheme(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              style: ListTileStyle.drawer,
-              tileColor: Theme.of(context).primaryColorDark,
-              iconColor: Theme.of(context).primaryColor,
-              textColor: Theme.of(context).primaryColor,
-              contentPadding:
-                  const EdgeInsets.only(top: 20, bottom: 20, right: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: Theme.of(context).primaryColorLight),
-                        image: const DecorationImage(
-                            image: AssetImage("lib/photos/KZT.jpg")),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                  RichText(
-                      text: TextSpan(children: [
-                    TextSpan(
-                        text: "Kaung Zaw Thant\n\n",
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
-                    const TextSpan(
-                        text: "Level 1",
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold))
-                  ])),
-                  ListTile(
-                    onTap: () {},
-                    leading: const Icon(FluentIcons.person_accounts_24_regular),
-                    title: const Text(
-                      "My Account",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      _advancedDrawerController.hideDrawer();
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: ((context) => const TimeCount())));
-                    },
-                    leading: const Icon(FluentIcons.history_24_regular),
-                    title: const Text("Pomodoro List",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                  ListTile(
-                    onTap: () {},
-                    leading: const Icon(FluentIcons.settings_24_regular),
-                    title: const Text("Settings",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                  ListTile(
-                    onTap: () {},
-                    leading: const Icon(FluentIcons.contact_card_24_regular),
-                    title: const Text("Contact Us",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          drawer: DrawerPage(advancedDrawerController: _advancedDrawerController),
           child: Scaffold(
             appBar: AppBar(
               elevation: 0,
@@ -363,7 +283,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       formKey: key,
                                       titleController: titleController,
                                       animationController: animationController,
-                                      onTimerDuration: (Duration duration) {
+                                      onTimerDurationChanged: (Duration duration) {
                                         setState(() {
                                           animationController.duration = duration;
                                           progress = 1.0;

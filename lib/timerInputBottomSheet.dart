@@ -1,21 +1,19 @@
-import 'package:pomodoro/timer.dart';
-import 'package:pomodoro/database_handler.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 
 class TimerInputBottomSheet extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController titleController;
   final AnimationController animationController;
-  final Function(Duration) onTimerDuration;
+  final Function(Duration) onTimerDurationChanged;
 
   const TimerInputBottomSheet({
     super.key,
     required this.formKey,
     required this.titleController,
     required this.animationController,
-    required this.onTimerDuration,
+    required this.onTimerDurationChanged,
 
   });
   @override
@@ -24,20 +22,11 @@ class TimerInputBottomSheet extends StatefulWidget {
 
 class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
   late Duration duration;
-
   bool changed = false;
   @override
   void initState() {
     super.initState();
     duration = widget.animationController.duration ?? const Duration(seconds: 0);
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    String hours = twoDigits(duration.inHours);
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$hours:$minutes:$seconds";
   }
 
   Widget build(BuildContext context) {
@@ -117,9 +106,7 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
           CupertinoTimerPicker(
             initialTimerDuration: widget.animationController.duration!,
             onTimerDurationChanged: (duration) {
-              setState(() {
-                widget.animationController.duration = duration;
-              });
+              widget.animationController.duration = duration;
             },
           ),
           MaterialButton(
@@ -131,17 +118,8 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
             color: Theme.of(context).primaryColor,
             onPressed: () async{
               if (widget.formKey.currentState!.validate()) {
-                widget.onTimerDuration(duration);
-                Timer newTimer = Timer(
-                  title: widget.titleController.text,
-                  timer: _formatDuration(duration),
-                  datetime: DateFormat.yMMMEd().format(DateTime.now()),
-                );
-                String? key = await DatabaseHandler().addTimer(newTimer);
-                if (key != null) {
-                  print("Timer saved with key: $key");
-                }
-                Navigator.pop(context);
+                widget.onTimerDurationChanged(widget.animationController.duration!);
+                Navigator.of(context).pop();
               }
             },
             child: Text(

@@ -259,7 +259,7 @@ class _timePageState extends State<timePage> with TickerProviderStateMixin {
                                                         .primaryColorLight,
                                                   ),
                                                   title: Text(
-                                                    snapshot.data![index].value.title,
+                                                    timer.title,
                                                     style: TextStyle(
                                                         color: Theme.of(context)
                                                             .primaryColorLight,
@@ -268,8 +268,7 @@ class _timePageState extends State<timePage> with TickerProviderStateMixin {
                                                             FontWeight.bold),
                                                   ),
                                                   subtitle: Text(
-                                                    snapshot
-                                                        .data![index].value.datetime,
+                                                    timer.datetime,
                                                     style: TextStyle(
                                                         color: Theme.of(context)
                                                             .primaryColorDark,
