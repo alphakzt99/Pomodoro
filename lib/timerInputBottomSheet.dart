@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -6,7 +5,7 @@ class TimerInputBottomSheet extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController titleController;
   final AnimationController animationController;
-  final Function(Duration) onTimerDurationChanged;
+  final Function(Duration,Duration) onTimerDurationChanged;
 
   const TimerInputBottomSheet({
     super.key,
@@ -14,26 +13,28 @@ class TimerInputBottomSheet extends StatefulWidget {
     required this.titleController,
     required this.animationController,
     required this.onTimerDurationChanged,
-
   });
   @override
   _TimerInputBottomSheetState createState() => _TimerInputBottomSheetState();
 }
 
 class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
-  late Duration duration;
+  late Duration workDuration;
+  late Duration restDuration;
   bool changed = false;
   @override
   void initState() {
     super.initState();
-    duration = widget.animationController.duration ?? const Duration(seconds: 0);
+    workDuration =
+        widget.animationController.duration ?? const Duration(minutes: 25);
+    restDuration = const Duration(minutes: 5);
   }
 
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return SizedBox(
       width: size.width,
-      height: size.height * 0.55,
+      height: size.height * 0.85,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -96,7 +97,7 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
             ),
           ),
           Text(
-            "Choose your timer",
+            "Choose Work Duration (Max 1 hr)",
             style: TextStyle(
               color: Theme.of(context).primaryColor,
               fontSize: 20,
@@ -104,9 +105,35 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
             ),
           ),
           CupertinoTimerPicker(
-            initialTimerDuration: widget.animationController.duration!,
+            mode: CupertinoTimerPickerMode.hm,
+            initialTimerDuration: workDuration,
             onTimerDurationChanged: (duration) {
-              widget.animationController.duration = duration;
+              setState(() {
+                workDuration = duration > const Duration(hours: 1)
+                    ? const Duration(hours: 1)
+                    : duration;
+              });
+            },
+          ),
+          Text(
+            "Choose Rest Duration (5-10 min)",
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          CupertinoTimerPicker(
+            mode: CupertinoTimerPickerMode.ms,
+            initialTimerDuration: restDuration,
+            onTimerDurationChanged: (duration) {
+              setState(() {
+                restDuration = duration < const Duration(minutes: 5)
+                    ? const Duration(minutes: 5)
+                    : duration > const Duration(minutes: 60)
+                        ? const Duration(minutes: 60)
+                        : duration;
+              });
             },
           ),
           MaterialButton(
@@ -116,9 +143,10 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             color: Theme.of(context).primaryColor,
-            onPressed: () async{
+            onPressed: () async {
               if (widget.formKey.currentState!.validate()) {
-                widget.onTimerDurationChanged(widget.animationController.duration!);
+                widget.onTimerDurationChanged(
+                    workDuration, restDuration);
                 Navigator.of(context).pop();
               }
             },

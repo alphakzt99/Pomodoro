@@ -92,28 +92,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   TextEditingController titleController = TextEditingController();
 
   bool isCounting = false;
-
+  bool isWorking = false;
+  late Duration workDuration;
+  late Duration restDuration;
   var key = GlobalKey<FormState>();
   bool looping = true;
   double progress = 1.0;
   @override
   void initState() {
     super.initState();
-
+    workDuration = const Duration(minutes: 25);
+    restDuration = const Duration(minutes: 5);
     _advancedDrawerController = AdvancedDrawerController();
     animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 60))
-..addListener(() {
-      if (animationController.isAnimating) {
-        setState(() {
-          progress = animationController.value;
-        });
-      } else {
-        setState(() {
-          progress = 1.0;
-          isCounting = false;
-        });
-      }
+        AnimationController(vsync: this, duration: workDuration)
+          ..addListener(() {
+            if (animationController.isAnimating) {
+              setState(() {
+                progress = animationController.value;
+              });
+            } else {
+              setState(() {
+                progress = 1.0;
+                isCounting = false;
+              });
+              handlePhase();
+            }
+          });
+
+    animationController.addStatusListener((status) {
       if (animationController.isDismissed) {
         FlutterRingtonePlayer().play(
             android: AndroidSounds.notification,
@@ -121,70 +128,92 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             volume: 1.0,
             looping: looping);
       }
-      if (animationController.isDismissed) {
-        Alert(
-                context: context,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                buttons: [
-                  DialogButton(
-                      radius: BorderRadius.circular(20),
-                      color: Theme.of(context).primaryColor,
-                      child: Text(
-                        "Dismiss",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Theme.of(context).primaryColorLight,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: () async {
-                        looping = false;
-                        FlutterRingtonePlayer().stop();
-                        Navigator.of(context).pop();
-                      }),
-                  DialogButton(
-                      radius: BorderRadius.circular(20),
-                      color: Theme.of(context).primaryColor,
-                      child: Text(
-                        "Save",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Theme.of(context).primaryColorLight,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: () async {
-                        looping = false;
-                        FlutterRingtonePlayer().stop();
-                        Timer time = Timer(
-                            title: titleController.text,
-                            timer: countText,
-                            datetime:
-                                DateFormat.yMMMEd().format(DateTime.now()));
-                        await databaseHandler.addTimer(time);
-                        setState(() {});
-                        Navigator.of(context).pop();
-                      })
-                ],
-                style: AlertStyle(
-                    descStyle: TextStyle(
-                      color: Theme.of(context).primaryColorLight,
+    });
+  }
+
+  void handlePhase() {
+    if (animationController.isDismissed) {
+      String stageTitle = isWorking ? "Work" : "Rest";
+      Alert(
+        context: context,
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+        buttons: [
+          DialogButton(
+              radius: BorderRadius.circular(20),
+              color: Theme.of(context).primaryColor,
+              child: Text(
+                "Dismiss",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColorLight,
+                    fontWeight: FontWeight.bold),
+              ),
+              onPressed: () async {
+                looping = false;
+                if (isWorking) {
+                  animationController.duration = restDuration;
+                  animationController.reverse(from: 1.0);
+                } else {
+                  animationController.duration = workDuration;
+                  animationController.reverse(from: 1.0);
+                }
+                FlutterRingtonePlayer().stop();
+                Navigator.of(context).pop();
+              }),
+          if (isWorking)
+            DialogButton(
+                radius: BorderRadius.circular(20),
+                color: Theme.of(context).primaryColor,
+                child: Text(
+                  "Save",
+                  style: TextStyle(
                       fontSize: 16,
-                    ),
-                    titleStyle: TextStyle(
-                        color: Theme.of(context).primaryColorLight,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    alertAlignment: Alignment.topCenter,
-                    alertBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-                title: "Alert",
-                desc: "Pomodoro timer is up.Rest and continue later.")
-            .show();
+                      color: Theme.of(context).primaryColorLight,
+                      fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
+                  looping = false;
+                  FlutterRingtonePlayer().stop();
+                  Timer time = Timer(
+                      title: titleController.text,
+                      timer: countText,
+                      datetime: DateFormat.yMMMEd().format(DateTime.now()));
+                  await databaseHandler.addTimer(time);
+                  Navigator.of(context).pop();
+                  switchStage();
+                })
+        ],
+        style: AlertStyle(
+            descStyle: TextStyle(
+              color: Theme.of(context).primaryColorLight,
+              fontSize: 16,
+            ),
+            titleStyle: TextStyle(
+                color: Theme.of(context).primaryColorLight,
+                fontSize: 24,
+                fontWeight: FontWeight.bold),
+            backgroundColor: Theme.of(context).primaryColor,
+            alertAlignment: Alignment.topCenter,
+            alertBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20))),
+        title: "$stageTitle Timer Up",
+        desc: isWorking
+            ? "Take a break! Rest timer will start next."
+            : "Back to work? Work timer will start next.",
+      ).show();
+    }
+  }
+
+  void switchStage() {
+    setState(() {
+      isWorking = !isWorking;
+      animationController.duration = isWorking ? workDuration : restDuration;
+      animationController.reset();
+      progress = 1.0;
+      if (isCounting) {
+        animationController.reverse(from: 1.0);
       }
     });
-
-    // TODO: implement initState
   }
 
   @override
@@ -196,7 +225,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _handleMenuDrawer() {
+  void handleMenuDrawer() {
     _advancedDrawerController.showDrawer();
   }
 
@@ -211,12 +240,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               BoxDecoration(borderRadius: BorderRadius.circular(20)),
           controller: _advancedDrawerController,
           backdropColor: Theme.of(context).primaryColorDark,
-          drawer: DrawerPage(advancedDrawerController: _advancedDrawerController),
+          drawer:
+              DrawerPage(advancedDrawerController: _advancedDrawerController),
           child: Scaffold(
             appBar: AppBar(
               elevation: 0,
               leading: IconButton(
-                  onPressed: _handleMenuDrawer,
+                  onPressed: handleMenuDrawer,
                   icon: ValueListenableBuilder<AdvancedDrawerValue>(
                     valueListenable: _advancedDrawerController,
                     builder: ((context, value, child) {
@@ -283,9 +313,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       formKey: key,
                                       titleController: titleController,
                                       animationController: animationController,
-                                      onTimerDurationChanged: (Duration duration) {
+                                      onTimerDurationChanged:
+                                          (Duration workDuration,
+                                              Duration restDuration) {
                                         setState(() {
-                                          animationController.duration = duration;
+                                          this.workDuration = workDuration;
+                                          this.restDuration = restDuration;
+                                          isWorking = true;
+                                          animationController.duration =
+                                              workDuration;
                                           progress = 1.0;
                                         });
                                       },
@@ -366,6 +402,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       animationController.reset();
                       setState(() {
                         isCounting = false;
+                        isWorking = true;
+                        animationController.duration = workDuration;
+                        progress = 1.0;
                       });
                     }
                   },
