@@ -3,18 +3,16 @@ import 'timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-
 class DatabaseHandler {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  
   User? get currentUser => _auth.currentUser;
 
-  
   Future<String?> signUp(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -24,7 +22,7 @@ class DatabaseHandler {
           'email': email,
           'createdAt': ServerValue.timestamp,
         });
-        return user.uid; 
+        return user.uid;
       }
       return null;
     } on FirebaseAuthException catch (e) {
@@ -49,7 +47,6 @@ class DatabaseHandler {
     }
   }
 
-  
   Future<void> signOut() async {
     await _auth.signOut();
   }
@@ -58,11 +55,8 @@ class DatabaseHandler {
     User? user = _auth.currentUser;
     if (user != null) {
       try {
-        DatabaseReference databaseReference = _dbRef
-        .child('users')
-        .child(user.uid)
-        .child('timers')
-        .push();
+        DatabaseReference databaseReference =
+            _dbRef.child('users').child(user.uid).child('timers').push();
 
         await databaseReference.set(timer.toMap());
 
@@ -85,9 +79,13 @@ class DatabaseHandler {
         if (snapshot.exists) {
           Map<dynamic, dynamic> timersMap =
               snapshot.value as Map<dynamic, dynamic>;
-          return timersMap.entries
-              .map((entry) => MapEntry(entry.key as String, Timer.fromMap(Map<String, dynamic>.from(entry.value))))
+          List<MapEntry<String, Timer>> timers = timersMap.entries
+              .map((entry) => MapEntry(entry.key as String,
+                  Timer.fromMap(Map<String, dynamic>.from(entry.value))))
               .toList();
+
+          quickSort(timers, 0, timers.length - 1);
+          return timers;
         }
         return [];
       } catch (e) {
@@ -97,6 +95,31 @@ class DatabaseHandler {
     } else {
       throw Exception("User not authenticated");
     }
+  }
+
+  void quickSort(List<MapEntry<String, Timer>> timers, int left, int right) {
+    if (left < right) {
+      int partitionIndex = partition(timers, left, right);
+      quickSort(timers, left, partitionIndex - 1);
+      quickSort(timers, partitionIndex + 1, right);
+    }
+  }
+
+  int partition(List<MapEntry<String, Timer>> timers, int left, int right) {
+    Timer pivot = timers[right].value;
+    int i = left - 1;
+    for (int j = left; j < right; j++) {
+      if (timers[j].value.datetime.compareTo(pivot.datetime) < 0) {
+        i++;
+        MapEntry<String, Timer> temp = timers[i];
+        timers[i] = timers[j];
+        timers[j] = temp;
+      }
+    }
+    MapEntry<String, Timer> temp = timers[i + 1];
+    timers[i + 1] = timers[right];
+    timers[right] = temp;
+    return i + 1;
   }
 
   Future<void> updateTimer(String timerKey, Timer updatedTimer) async {
@@ -137,6 +160,7 @@ class DatabaseHandler {
 
   Stream<List<MapEntry<String, Timer>>> listenToTimers() {
     User? user = _auth.currentUser;
+    List<MapEntry<String, Timer>> timers = [];
     if (user != null) {
       return _dbRef
           .child('users')
@@ -146,16 +170,16 @@ class DatabaseHandler {
           .map((event) {
         final data = event.snapshot.value;
         if (data != null && data is Map) {
-          return data.entries
-              .map((entry) => MapEntry(entry.key as String, Timer.fromMap(Map<String, dynamic>.from(entry.value))))
+          timers = data.entries
+              .map((entry) => MapEntry(entry.key as String,
+                  Timer.fromMap(Map<String, dynamic>.from(entry.value))))
               .toList();
+          quickSort(timers, 0, timers.length - 1);
         }
-        return [];
+        return timers;
       });
     } else {
       throw Exception("User not authenticated");
     }
   }
 }
-
-
