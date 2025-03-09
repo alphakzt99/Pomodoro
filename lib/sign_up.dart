@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'auth_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -102,6 +103,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: Theme.of(context).primaryColorLight,
+                      ),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           try {
@@ -151,6 +156,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         Navigator.pushReplacementNamed(context, '/signin');
                       },
                       child: Text('Already have an account? Sign In'),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      icon: FaIcon(
+                        FontAwesomeIcons.google,
+                        size: 24,
+                        color: Colors.red,
+                      ),
+                      label: const Text('Sign up with Google'),
+                      onPressed: () async {
+                        try{
+                          await _auth.signInWithGoogle();
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Failed to sign in with Google')),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      icon: FaIcon(
+                        FontAwesomeIcons.apple,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                      label: const Text('Sign in with Apple'),
+                      onPressed: () async {
+                        try {
+                          await _auth.signInWithApple();
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Failed to sign in with Apple')),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),

@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pomodoro/database_handler.dart';
 import 'auth_service.dart';
+
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -41,23 +42,24 @@ class _SignInScreenState extends State<SignInScreen> {
                         contentPadding: EdgeInsets.all(8),
                         iconColor: Theme.of(context).primaryColorLight,
                         hintText: 'Enter your email',
-                        hintStyle: TextStyle(
-                            color: Colors.black38),
+                        hintStyle: TextStyle(color: Colors.black38),
                         icon: Icon(Icons.email),
                         filled: true,
                         fillColor: Theme.of(context).primaryColorDark,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              12.0), 
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                       ),
                       validator: (value) =>
@@ -70,23 +72,24 @@ class _SignInScreenState extends State<SignInScreen> {
                         contentPadding: EdgeInsets.all(8),
                         iconColor: Theme.of(context).primaryColorLight,
                         hintText: 'Enter your password',
-                        hintStyle: TextStyle(
-                            color: Colors.black38),
+                        hintStyle: TextStyle(color: Colors.black38),
                         icon: Icon(Icons.lock),
                         filled: true,
                         fillColor: Theme.of(context).primaryColorDark,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              12.0), 
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColorDark),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColorDark),
                         ),
                       ),
                       obscureText: true,
@@ -108,9 +111,8 @@ class _SignInScreenState extends State<SignInScreen> {
                               _passwordController.text,
                             );
                             if (_auth.currentUser != null && uid != null) {
-                              Navigator.pushReplacementNamed(
-                                  context, '/home');
-                            } 
+                              Navigator.pushReplacementNamed(context, '/home');
+                            }
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Error: ${e.toString()}')),
@@ -122,12 +124,52 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                        foregroundColor: Theme.of(context).primaryColorLight
-                      ),
+                          foregroundColor: Theme.of(context).primaryColorLight),
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/signup');
                       },
                       child: Text('Create an account here. Sign Up'),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      icon: FaIcon(
+                        FontAwesomeIcons.google,
+                        size: 24,
+                        color: Colors.red,
+                      ),
+                      label: const Text('Sign in with Google'),
+                      onPressed: () async {
+                        _auth.signInWithGoogle();
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      icon: FaIcon(
+                        FontAwesomeIcons.apple,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                      label: const Text('Sign in with Apple'),
+                      onPressed: () async {
+                        try {
+                          await _auth.signInWithApple();
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Failed to sign in with Apple')),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
