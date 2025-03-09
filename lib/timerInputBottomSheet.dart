@@ -30,6 +30,7 @@ class _TimerInputBottomSheetState extends State<TimerInputBottomSheet> {
     restDuration = const Duration(minutes: 5);
   }
 
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return SizedBox(

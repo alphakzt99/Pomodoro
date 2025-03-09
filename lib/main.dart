@@ -150,15 +150,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
               onPressed: () async {
                 looping = false;
-                if (isWorking) {
-                  animationController.duration = restDuration;
-                  animationController.reverse(from: 1.0);
-                } else {
-                  animationController.duration = workDuration;
-                  animationController.reverse(from: 1.0);
-                }
                 FlutterRingtonePlayer().stop();
                 Navigator.of(context).pop();
+                switchStage();
               }),
           if (isWorking)
             DialogButton(

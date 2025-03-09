@@ -43,5 +43,5 @@ COPY . .
 # Get Flutter dependencies
 RUN flutter pub get
 
-# Default command (can be overridden)
+
 CMD ["flutter", "run"]
