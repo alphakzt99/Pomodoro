@@ -285,7 +285,7 @@ class _timePageState extends State<timePage> with TickerProviderStateMixin {
                             )
                           : SizedBox(
                               width: size.width * 0.8,
-                              height: size.height * 0.7,
+                              height: size.height * 0.8,
                               child: const Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,6 @@
 import 'dart:core';
+import 'package:intl/intl.dart' show DateFormat;
+
 import 'timer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -96,6 +98,24 @@ class DatabaseHandler {
       throw Exception("User not authenticated");
     }
   }
+
+  Map<String, Map<int, int>> groupTimersbyMonth(List<MapEntry<String, Timer>> timers) {
+    Map<String, Map<int, int>> groupedTimers = {};
+    for (var timer in timers) {
+      
+      DateTime dateTime = DateFormat.yMMMEd().parse(timer.value.datetime);
+      String month = DateFormat("MMMM").format(dateTime);
+    
+      int day = dateTime.day;
+      if (groupedTimers.containsKey(month)) {
+        groupedTimers[month]![day] = (groupedTimers[month]![day] ?? 0) + 1;
+      } else {
+        groupedTimers[month] = {day: 1};
+      }
+    }
+    return groupedTimers;
+  }
+
 
   void quickSort(List<MapEntry<String, Timer>> timers, int left, int right) {
     if (left < right) {
