@@ -41,32 +41,59 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: _authService.authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
-        
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Pomodoro',
-          theme: ThemeData(
-              primaryColor: Colors.black,
-              primaryColorLight: const Color(0xFF7AE582),
-              primaryColorDark: Colors.white),
-          initialRoute: '/signup',
-          routes: {
-            '/signup': (context) => SignUpScreen(),
-            '/signin': (context) => SignInScreen(),
-            '/home': (context) => MyHomePage(
-                  timer: Timer(),
-                  context1: context,
-                ),
-            '/timePage': (context) => timePage(),
-          },
-        );
-      },
-    );
+        stream: _authService.authStateChanges,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          return FutureBuilder<bool>(
+            future: _authService.isTokenValid(),
+            builder: (context, sessionSnapshot) {
+              if (sessionSnapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (sessionSnapshot.data == true && sessionSnapshot.hasData) {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Pomodoro',
+                  theme: ThemeData(
+                      primaryColor: Colors.black,
+                      primaryColorLight: const Color(0xFF7AE582),
+                      primaryColorDark: Colors.white),
+                  initialRoute: '/signup',
+                  routes: {
+                    '/signup': (context) => SignUpScreen(),
+                    '/signin': (context) => SignInScreen(),
+                    '/home': (context) => MyHomePage(
+                          timer: Timer(),
+                          context1: context,
+                        ),
+                    '/timePage': (context) => timePage(),
+                  },
+                );
+              } else {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Pomodoro',
+                  theme: ThemeData(
+                      primaryColor: Colors.black,
+                      primaryColorLight: const Color(0xFF7AE582),
+                      primaryColorDark: Colors.white),
+                  initialRoute: '/signup',
+                  routes: {
+                    '/signup': (context) => SignUpScreen(),
+                    '/signin': (context) => SignInScreen(),
+                    '/home': (context) => MyHomePage(
+                          timer: Timer(),
+                          context1: context,
+                        ),
+                    '/timePage': (context) => timePage(),
+                  },
+                );
+              }
+            },
+          );
+        });
   }
 }
 
