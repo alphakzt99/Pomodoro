@@ -46,6 +46,7 @@ class _MyAppState extends State<MyApp> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         }
+        
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Pomodoro',
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   TextEditingController titleController = TextEditingController();
 
   bool isCounting = false;
-  bool isWorking = false;
+  bool isWorking = true;
   late Duration workDuration;
   late Duration restDuration;
   var key = GlobalKey<FormState>();
@@ -154,28 +155,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 Navigator.of(context).pop();
                 switchStage();
               }),
-          if (isWorking)
-            DialogButton(
-                radius: BorderRadius.circular(20),
-                color: Theme.of(context).primaryColor,
-                child: Text(
-                  "Save",
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).primaryColorLight,
-                      fontWeight: FontWeight.bold),
-                ),
-                onPressed: () async {
-                  looping = false;
-                  FlutterRingtonePlayer().stop();
-                  Timer time = Timer(
-                      title: titleController.text,
-                      timer: countText,
-                      datetime: DateFormat.yMMMEd().format(DateTime.now()));
-                  await databaseHandler.addTimer(time);
-                  Navigator.of(context).pop();
-                  switchStage();
-                })
+          DialogButton(
+              radius: BorderRadius.circular(20),
+              color: Theme.of(context).primaryColor,
+              child: Text(
+                "Save",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColorLight,
+                    fontWeight: FontWeight.bold),
+              ),
+              onPressed: () async {
+                looping = false;
+                FlutterRingtonePlayer().stop();
+                Timer time = Timer(
+                    title: titleController.text,
+                    timer: countText,
+                    datetime: DateFormat.yMMMEd().format(DateTime.now()));
+                await databaseHandler.addTimer(time);
+                Navigator.of(context).pop();
+                switchStage();
+              })
         ],
         style: AlertStyle(
             descStyle: TextStyle(
@@ -198,16 +198,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
   }
 
+  void startTimer() {
+    if (!animationController.isAnimating) {
+      animationController.reverse(from: 1.0);
+      setState(() {
+        isCounting = true;
+      });
+    }
+  }
+
   void switchStage() {
     setState(() {
       isWorking = !isWorking;
       animationController.duration = isWorking ? workDuration : restDuration;
       animationController.reset();
       progress = 1.0;
-      if (isCounting) {
-        animationController.reverse(from: 1.0);
-      }
+      isCounting = true;
     });
+    startTimer();
   }
 
   @override
@@ -350,13 +358,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           isCounting = false;
                         });
                       } else {
-                        animationController.reverse(
-                            from: animationController.value == 0
-                                ? 1.0
-                                : animationController.value);
-                        setState(() {
-                          isCounting = true;
-                        });
+                        startTimer();
                       }
                     },
                     child: isCounting == false
@@ -391,15 +393,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       animationController.reset();
                       setState(() {
                         isCounting = false;
-                      });
-                    } else {
-                      animationController.reset();
-                      setState(() {
-                        isCounting = false;
                         isWorking = true;
                         animationController.duration = workDuration;
                         progress = 1.0;
                       });
+                    } else {
+                      startTimer();
                     }
                   },
                   child: Text(
